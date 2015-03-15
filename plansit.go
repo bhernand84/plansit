@@ -3,6 +3,7 @@ package plansit
 import(
 	"net/http"
 	"html/template"
+	"models"
 )
 
 var (
@@ -14,6 +15,9 @@ func init(){
 }
 
 func root(w http.ResponseWriter, r *http.Request){
-	indexTemplate.Execute(w, "hello app")
+	myPlace := &places.Place{}
+	myPlace.Add("hello", "009090920")
+
+	indexTemplate.Execute(w, myPlace.Title())
 }
 
