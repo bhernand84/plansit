@@ -1,3 +1,4 @@
+
 package plansit
 
 import(
@@ -17,6 +18,9 @@ func init(){
 	http.HandleFunc("/",root)
 	http.HandleFunc("/mapper", mapper)
 	http.HandleFunc("/place/add", addPlace)
+    http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+        http.ServeFile(w, r, r.URL.Path[1:])
+    })
 }
 
 func root(w http.ResponseWriter, r *http.Request){
