@@ -5,21 +5,27 @@ var infowindow;
 var markers = [];
 
 function Initialize() {
-
     mapOptions = {
-        zoom: 10,
-        center: new google.maps.LatLng(50.9500, -70.1667)
+        zoom: 14,
+        center: new google.maps.LatLng(50.9500, -70.1667),
+        mapTypeId: google.maps.MapTypeId.ROADMAP
     };
     map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
 
     AttemptGeolocation();
-    setTimeout(null, 3000);
 
     var input = (document.getElementById('pac-input'));
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
     var searchBox = new google.maps.places.SearchBox((input));
 
+    setTimeout(AddMapListeners(input, searchBox), 1);  
+    map.setZoom(15);
+
+    
+}
+
+function AddMapListeners(input, searchBox){
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
@@ -30,34 +36,16 @@ function Initialize() {
             marker.setMap(null);
         }
 
-        // For each place, get the icon, place name, and location.
         markers = [];
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0, place; place = places[i]; i++) {
-            var image = {
-                url: place.icon,
-                size: new google.maps.Size(71, 71),
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(17, 34),
-                scaledSize: new google.maps.Size(25, 25)
-            };
-
-            // Create a marker for each place.
-            var marker = new google.maps.Marker({
-                map: map,
-                icon: image,
-                title: place.name,
-                position: place.geometry.location
-            });
-
-            markers.push(marker);
-
+            CreateMarker(places[i]);            
+            console.log('markers pushed');
             bounds.extend(place.geometry.location);
         }
 
         map.fitBounds(bounds);
     });
-    // [END region_getplaces]
 
     // Bias the SearchBox results towards places that are within the bounds of the
     // current map's viewport.
@@ -69,14 +57,25 @@ function Initialize() {
 
 function CreateMarker(place) {
     var placeLoc = place.geometry.location;
+    var image = {
+                url: place.icon,
+                size: new google.maps.Size(45, 45),
+                origin: new google.maps.Point(0, 0),
+                anchor: new google.maps.Point(17, 34),
+                scaledSize: new google.maps.Size(25, 25)
+            };
     var marker = new google.maps.Marker({
         map: map,
+        icon: image,
+        title: place.name,
         position: place.geometry.location,
         placeId: place.place_id
     });
     google.maps.event.addListener(marker, 'click', function () {
         getPlaceDetails(marker);
     });
+
+    markers.push(marker);
 }
 
 function HandleNoGeolocation(errorFlag) {
@@ -107,6 +106,7 @@ function AttemptGeolocation() {
         navigator.geolocation.getCurrentPosition(function (position) {
             var center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             map.setCenter(center);
+
             console.log(map.center);
 
             var windowContent = '<div>Current Location</div>';
@@ -133,12 +133,9 @@ function AttemptGeolocation() {
         console.log("geolocation is false");
         HandleNoGeolocation(browserSupportFlag);
     }
-
-    console.log(map.center + "during geolocation");
 }
 
 function searchNearby() {
-
     var myMap = map.getCenter();
 
     request = {
@@ -194,6 +191,7 @@ function getPlaceDetails(marker) {
        '<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>'
         '</div>' +
         '</div>';
+
         infowindow.setContent(contentString);
         infowindow.open(map, marker);
 
@@ -208,6 +206,13 @@ function getPlaceDetails(marker) {
         }
     }
 }
+
+function ClearMarkers() {
+    for (var i = 0; i < markers.length; i++ ) {
+        markers[i].setMap(null);
+    }
+        markers.length = 0;
+    };
 
 function callback(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
