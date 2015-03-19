@@ -7,6 +7,7 @@ import(
 	"models"
 	"appengine"
 	"appengine/user"
+	"appengine/datastore"
 )
 
 var (
@@ -25,10 +26,9 @@ func init(){
 
 func root(w http.ResponseWriter, r *http.Request){
 	currentUser.checkAuth(w,r)
-	myPlace := &places.Place{}
-	myPlace.Add("hello", "009090920")
+	myPlaces := GetPlace(r)
 
-	indexTemplate.Execute(w, currentUser.Email)
+	indexTemplate.Execute(w, myPlaces)
 }
 
 func mapper( w http.ResponseWriter, r *http.Request){
@@ -36,8 +36,11 @@ func mapper( w http.ResponseWriter, r *http.Request){
 	mapperTemplate.Execute(w, "")
 }
 func addPlace(w http.ResponseWriter, r * http.Request){
- 	placeid, notes := r.FormValue("placeid"), r.FormValue("note")
+ 	placeid, notes := r.FormValue("placeid"), r.FormValue("notes")
  	currentUser.checkAuth(w, r)
+ 	place := &models.Place{placeid, notes}	
+ 	PutPlace(r, place)
+
  	indexTemplate.Execute(w, placeid +  " "  + notes)
 
 }
@@ -65,4 +68,28 @@ func (currentUser *plansitUser) checkAuth(w http.ResponseWriter, r *http.Request
     currentUser.Email = u.Email
 
 }
+func PutPlace(r *http.Request, place *models.Place){
+	c:= appengine.NewContext(r)
+  	key := datastore.NewIncompleteKey(c, "Place", placeKey(c))
+    _, err := datastore.Put(c, key, place)
+    if err !=nil{
+    	return
+    }
+}
+func GetPlace(r *http.Request) []models.Place{
+    c:= appengine.NewContext(r)
+    q := datastore.NewQuery("Place").Ancestor(placeKey(c)).Limit(10)
+    var places []models.Place
+    _, err := q.GetAll(c, &places)
+    if err !=nil{
+    	return nil
+    }
+    return places
+}
+
+func placeKey(c appengine.Context) *datastore.Key {
+        // The string "default_guestbook" here could be varied to have multiple guestbooks.
+        return datastore.NewKey(c, "Place", "default_place", 0, nil)
+}
+
 
