@@ -38,10 +38,10 @@ func mapper( w http.ResponseWriter, r *http.Request){
 func addPlace(w http.ResponseWriter, r * http.Request){
  	placeid, notes := r.FormValue("placeid"), r.FormValue("notes")
  	currentUser.checkAuth(w, r)
- 	place := &models.Place{placeid, notes}	
+ 	place := &models.Place{placeid, notes, currentUser.Userid}	
  	PutPlace(r, place)
 
- 	indexTemplate.Execute(w, placeid +  " "  + notes)
+ 	indexTemplate.Execute(w, placeid +  " "  + notes + " " + currentUser.Email)
 
 }
 
@@ -64,9 +64,35 @@ func (currentUser *plansitUser) checkAuth(w http.ResponseWriter, r *http.Request
         w.WriteHeader(http.StatusFound)
         return 
     }
-    currentUser.Userid = u.ID
-    currentUser.Email = u.Email
+    GetUser(r, u)
+    if currentUser == nil{
+    	newUser := &plansitUser{u.ID, "hi", u.Email}
+    	PutUser(r, newUser)
+   	currentUser = &plansitUser{u.ID, "hi", u.Email}
+	}
+}
 
+func PutUser(r *http.Request, myUser *plansitUser){
+	c:= appengine.NewContext(r)
+	key := datastore.NewIncompleteKey(c, "User", userKey(c))
+	_, err := datastore.Put(c, key, myUser)
+    if err !=nil{
+    	return
+    }
+}
+
+func GetUser(r *http.Request, u *user.User) {
+	c:= appengine.NewContext(r)
+	q := datastore.NewQuery("User").Ancestor(userKey(c)).Filter("Userid=", u.ID)
+	var newUsers []plansitUser;
+	_, err  := q.GetAll(c, &newUsers)
+	if err != nil{
+		return 
+	}
+	if newUsers != nil{
+		currentUser= newUsers[0]
+		currentUser.Userid = "1111"
+	}
 }
 func PutPlace(r *http.Request, place *models.Place){
 	c:= appengine.NewContext(r)
@@ -87,6 +113,10 @@ func GetPlace(r *http.Request) []models.Place{
     return places
 }
 
+func userKey(c appengine.Context) *datastore.Key {
+        // The string "default_guestbook" here could be varied to have multiple guestbooks.
+        return datastore.NewKey(c, "User", "default_user", 0, nil)
+}
 func placeKey(c appengine.Context) *datastore.Key {
         // The string "default_guestbook" here could be varied to have multiple guestbooks.
         return datastore.NewKey(c, "Place", "default_place", 0, nil)
