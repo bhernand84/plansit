@@ -29,6 +29,7 @@ function Initialize() {
 }
 
 function AddMapListeners(input, searchBox, types){
+    document.getElementById("toggleSavedMarkers").disabled = true;
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
@@ -60,6 +61,7 @@ function AddMapListeners(input, searchBox, types){
 function LoadSavedPlaces(myPlaces){
     var isSavedBool = true;
     if(myPlaces.length != 0){
+        EnableSavedMarkersToggle();
         for(var i = 0, savedPlace; savedPlace = myPlaces[i]; i++){
             //get details from each place based of the place_id given.
             var service = new google.maps.places.PlacesService(map);
@@ -278,16 +280,12 @@ function Callback(results, status) {
 
 function ToggleSavedMarkers() {
     //false = hide     true = show
-    if(mySavedPlaces != null){
-        if (toggleSavedPlaces == false) {
-            HideSavedMarkers();
-            toggleSavedPlaces = true;
-        } else {
-            ShowSavedMarkers();
-            toggleSavedPlaces = false;
-        }
-    } else{
-
+    if (toggleSavedPlaces == false) {
+        HideSavedMarkers();
+        toggleSavedPlaces = true;
+    } else {
+        ShowSavedMarkers();
+        toggleSavedPlaces = false;
     }
 
     function SetAllMap(map) {
@@ -305,6 +303,9 @@ function ToggleSavedMarkers() {
     }
 }
 
+function EnableSavedMarkersToggle(){
+    document.getElementById("toggleSavedMarkers").disabled = false;
+}
 
 
 window.onload = LoadScript;
