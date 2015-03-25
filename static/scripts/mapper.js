@@ -6,6 +6,23 @@ var markers = [];
 var mySavedPlaces = [];
 var toggleSavedPlaces = true;
 
+var testPlaceArray =
+                    [{id: 1,
+                    placeId: "ChIJK91CahTGxokRYexHytuYDbk",
+                    notes: "Great local bar",
+                    category:["Bar", "Dinner", "Happy Hour"]
+                    },
+                    {id: 2,
+                    placeId: "ChIJQ4HNIkDGxokRYxgH87uN53w",
+                    notes: "Good Beer! Food is alright",
+                    category:["Bar", "Happy Hour"]
+                    },
+                    {id: 3,
+                    placeId: "ChIJ6bNuLSnGxokR29Oj-g9Tojo",
+                    notes: "Good reward points.  Nice view",
+                    category:["Hotel"]
+                    }];
+
 function Initialize() {
     mapOptions = {
         zoom: 14,
@@ -57,22 +74,27 @@ function AddMapListeners(input, searchBox, types){
     });
 }
 
-function LoadSavedPlaces(myPlaces){
+function LoadSavedPlaces(myPlacesArray){
     var isSavedBool = true;
-    if(myPlaces.length != 0){
-        for(var i = 0, savedPlace; savedPlace = myPlaces[i]; i++){
-            //get details from each place based of the place_id given.
+    if(myPlacesArray.length != 0){
+        var bounds = new google.maps.LatLngBounds();
+        for(var i = 0, savedPlace; savedPlace = myPlacesArray[i]; i++){
+            //get details from each place based of the placeId given.
             var service = new google.maps.places.PlacesService(map);
             request = {
-                placeId: savedPlace,
+                placeId: savedPlace.placeId
             };
             service.getDetails(request, function (place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
                     CreateMarker(place, isSavedBool);
+                    console.log(place.geometry.location);
+                    bounds.extend(place.geometry.location);
+                    map.fitBounds(bounds);
                 }
             });            
         }
-    }
+        map.setCenter(bounds.getCenter());
+    }  
 }
 
 function IsAlreadySaved(place){
@@ -270,7 +292,7 @@ function Callback(results, status) {
         for (var i = 0; i < results.length; ++i) {
             bounds.extend(results[i].geometry.location);
             var place = results[i];
-            CreateMarker(results[i]);
+            CreateMarker(place);
         }
         map.fitBounds(bounds);
     }
@@ -304,6 +326,9 @@ function ToggleSavedMarkers() {
     }
 }
 
+function SavePlace(place){
+    //Save searched place to database, along with personal notes and detailed category
 
+}
 
 window.onload = LoadScript;
