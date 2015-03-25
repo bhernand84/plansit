@@ -4,7 +4,7 @@ var browserSupportFlag;
 var infowindow;
 var markers = [];
 var mySavedPlaces = [];
-var toggleSavedPlaces = true;
+var toggleSavedPlaces = false;
 
 var testPlaceArray =
                     [{id: 1,
@@ -46,6 +46,7 @@ function Initialize() {
 }
 
 function AddMapListeners(input, searchBox, types){
+    document.getElementById("toggleSavedMarkers").disabled = true;
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
@@ -78,6 +79,7 @@ function LoadSavedPlaces(myPlacesArray){
     var isSavedBool = true;
     if(myPlacesArray.length != 0){
         var bounds = new google.maps.LatLngBounds();
+        EnableSavedMarkersToggle();
         for(var i = 0, savedPlace; savedPlace = myPlacesArray[i]; i++){
             //get details from each place based of the placeId given.
             var service = new google.maps.places.PlacesService(map);
@@ -308,19 +310,16 @@ function ToggleSavedMarkers() {
         toggleSavedPlaces = false;
     }
 
-    // Sets the map on all markers in the array.
     function SetAllMap(map) {
         for (var i = 0; i < mySavedPlaces.length; i++) {
             mySavedPlaces[i].setMap(map);
         }
     }
 
-    // Removes the markers from the map, but keeps them in the array.
     function HideSavedMarkers() {
         SetAllMap(null);
     }
 
-    // Shows any markers currently in the array.
     function ShowSavedMarkers() {
         SetAllMap(map);
     }
@@ -328,7 +327,12 @@ function ToggleSavedMarkers() {
 
 function SavePlace(place){
     //Save searched place to database, along with personal notes and detailed category
-
 }
+
+function EnableSavedMarkersToggle(){
+    document.getElementById("toggleSavedMarkers").disabled = false;
+}
+
+
 
 window.onload = LoadScript;
