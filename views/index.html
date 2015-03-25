@@ -1,6 +1,14 @@
 <html>
 	<body>
 		<p>plansddit</p>
-		<pre>{{.}}</pre>
+		{{range .}}
+		<pre>{{.Place_id}} {{.Notes}}</pre>
+		{{end}}
+		<div>
+			<form action="/place/add" method="Post">
+				<input name="placeid" type="textbox"/>
+				<input name="notes" type="textbox"/>
+				<input type="submit" value="add place"/>
+			</form>	
 	</body>
 </html>
