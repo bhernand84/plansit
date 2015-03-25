@@ -37,13 +37,26 @@
         .detailWindow{
             max-width: 200px;
         }
+        #distance-selector {
+        color: #fff;
+        background-color: #4d90fe;
+        padding: 5px 11px 0px 11px;
+        max-width: 400px;
+      }
+
+      #distance-selector label {
+        font-family: Roboto;
+        font-size: 13px;
+        font-weight: 300;
+      }
+
     </style>
     <script type="text/javascript" src="/static/scripts/mapper.js"></script>
     <script src="/static/scripts/jquery-1.10.2.js"></script>
 </head>
 <body>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-    <button id="button">click</button>
+    <input id="toggleSavedMarkers" onclick="ToggleSavedMarkers()" type=button value="Toggle Saved Markers"></input><input onclick="ClearMarkers();" type=button value="Clear Unsaved Markers">
     <div id="map-canvas"></div>
 </body>
 </html>

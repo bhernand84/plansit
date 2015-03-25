@@ -3,6 +3,8 @@ var mapOptions;
 var browserSupportFlag;
 var infowindow;
 var markers = [];
+var mySavedPlaces = [];
+var toggleSavedPlaces = true;
 
 function Initialize() {
     mapOptions = {
@@ -16,16 +18,17 @@ function Initialize() {
     AttemptGeolocation();
 
     var input = (document.getElementById('pac-input'));
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
     var searchBox = new google.maps.places.SearchBox((input));
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    var autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.bindTo('bounds', map);
 
     setTimeout(AddMapListeners(input, searchBox), 1);  
     map.setZoom(15);
-
-    
 }
 
-function AddMapListeners(input, searchBox){
+function AddMapListeners(input, searchBox, types){
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
@@ -36,17 +39,16 @@ function AddMapListeners(input, searchBox){
             marker.setMap(null);
         }
 
-        markers = [];
+        ClearMarkers();
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0, place; place = places[i]; i++) {
-            CreateMarker(places[i]);            
+            CreateMarker(place);            
             console.log('markers pushed');
             bounds.extend(place.geometry.location);
         }
 
         map.fitBounds(bounds);
     });
-
     // Bias the SearchBox results towards places that are within the bounds of the
     // current map's viewport.
     google.maps.event.addListener(map, 'bounds_changed', function() {
@@ -55,27 +57,74 @@ function AddMapListeners(input, searchBox){
     });
 }
 
-function CreateMarker(place) {
-    var placeLoc = place.geometry.location;
-    var image = {
-                url: place.icon,
-                size: new google.maps.Size(45, 45),
-                origin: new google.maps.Point(0, 0),
-                anchor: new google.maps.Point(17, 34),
-                scaledSize: new google.maps.Size(25, 25)
+function LoadSavedPlaces(myPlaces){
+    var isSavedBool = true;
+    if(myPlaces.length != 0){
+        for(var i = 0, savedPlace; savedPlace = myPlaces[i]; i++){
+            //get details from each place based of the place_id given.
+            var service = new google.maps.places.PlacesService(map);
+            request = {
+                placeId: savedPlace,
             };
+            service.getDetails(request, function (place, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    CreateMarker(place, isSavedBool);
+                }
+            });            
+        }
+    }
+}
+
+function IsAlreadySaved(place){
+    //savedPlaces is a collection of objects, not id's
+    var savedPlacesIDs = [];
+    for(var i = 0; i < mySavedPlaces.length; i++){
+        savedPlacesIDs.push(mySavedPlaces[i].place_id);
+    }
+
+    if(savedPlacesIDs.indexOf(place.place_id)!= -1){
+        place.isSaved = true;
+        console.log("already saved");
+    }
+    else{
+        place.isSaved = false;
+    }
+}
+
+function CreateMarker(placeResult, isSavedBool) {
+    var placeLoc = placeResult.geometry.location;
+    var image = {
+            url: placeResult.icon,
+            size: new google.maps.Size(45, 45),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(25, 25)
+        };
+    
     var marker = new google.maps.Marker({
         map: map,
         icon: image,
-        title: place.name,
-        position: place.geometry.location,
-        placeId: place.place_id
-    });
-    google.maps.event.addListener(marker, 'click', function () {
-        getPlaceDetails(marker);
+        title: placeResult.name,
+        place: {
+            placeId: placeResult.place_id,
+            location: placeLoc
+        },
+        isSaved: IsAlreadySaved(placeResult)
     });
 
+    if(isSavedBool!=null){
+        marker.isSaved = true;
+    };
+
+    google.maps.event.addListener(marker, 'click', function () {
+        GetPlaceDetails(marker);
+    });
+    if(marker.isSaved){
+        mySavedPlaces.push(marker);
+    }
+    else if(!marker.isSaved){
     markers.push(marker);
+    };
 }
 
 function HandleNoGeolocation(errorFlag) {
@@ -107,8 +156,6 @@ function AttemptGeolocation() {
             var center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             map.setCenter(center);
 
-            console.log(map.center);
-
             var windowContent = '<div>Current Location</div>';
 
             var marker = new google.maps.Marker({
@@ -135,7 +182,8 @@ function AttemptGeolocation() {
     }
 }
 
-function searchNearby() {
+function SearchNearby() {
+    ClearMarkers();
     var myMap = map.getCenter();
 
     request = {
@@ -145,76 +193,78 @@ function searchNearby() {
     };
 
     var service = new google.maps.places.PlacesService(map);
-    service.nearbySearch(request, callback)
+    service.nearbySearch(request, Callback)
 }
 
-function getPlaceDetails(marker) {
+function GetPlaceDetails(marker) {
     if (infowindow) {
         infowindow.close();
     };
     infowindow = new google.maps.InfoWindow();
     var service = new google.maps.places.PlacesService(map);
     request = {
-        placeId: marker.placeId
+        placeId: marker.place.placeId
     };
 
     service.getDetails(request, function (place, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
-            openInfoWindow(place);
+            OpenInfoWindow(place, marker);
         }
     });
+}
 
-    function openInfoWindow(place) {
-        google.maps.event.addListener(marker, 'click', function () {
-            if (infowindow) {
-                console.log('found a window!');
-                infowindow.close();
-            }
-        });
-        google.maps.event.addListener(map, 'click', function () {
-            if (infowindow) {
-                console.log('found a window!');
-                infowindow.close();
-            }
-        });
-        var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
-        var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
-        var rating = (place.rating == null) ? null : place.rating;
-        var contentString = '<div class="detailWindow">' +
-       '<div id="siteNotice">' +
-       '</div>' +
-       '<h3 id="firstHeading" class="firstHeading">' + place.name + '</h3>' +
-       '<div id="bodyContent">' +
-       '<h5 class="address">' + place.formatted_address + '</h5>' +
-       '<p class="phone">Phone: ' + phone + '</p>' +
-       '<p class="rating">Rating: ' + rating + '</p>' +
-       '<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>'
-        '</div>' +
-        '</div>';
+function OpenInfoWindow(place, marker) {
+    google.maps.event.addListener(marker, 'click', function () {
+        if (infowindow) {
+            console.log('found a window!');
+            infowindow.close();
+        }
+    });
+    google.maps.event.addListener(map, 'click', function () {
+        if (infowindow) {
+            console.log('found a window!');
+            infowindow.close();
+        }
+    });
+    var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
+    var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
+    var rating = (place.rating == null) ? null : place.rating;
+    var contentString = '<div class="detailWindow">' +
+   '<div id="siteNotice">' +
+   '</div>' +
+   '<h3 id="firstHeading" class="firstHeading">' + place.name + '</h3>' +
+   '<div id="bodyContent">' +
+   '<h5 class="address">' + place.formatted_address + '</h5>' +
+    '</div>' +
+    '</div>';
 
-        infowindow.setContent(contentString);
-        infowindow.open(map, marker);
+    infowindow.setContent(contentString);
+    infowindow.open(map, marker);
 
-        if (!photo) {
-            $('.images').hide();
-        }
-        if (!rating) {
-            $('.rating').hide();
-        }
-        if (!phone) {
-            $('.phone').hide();
-        }
+    if (photo) {
+        $('#bodyContent').append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
+    }
+    if (rating) {
+        $('#bodyContent').append('<p class="rating">Rating: ' + rating + '</p>');
+    }
+    if (phone) {
+        $('#bodyContent').append('<p class="phone">Phone: ' + phone + '</p>');
     }
 }
 
 function ClearMarkers() {
     for (var i = 0; i < markers.length; i++ ) {
+        //add if statement to keep markers with isSaved bool = true on the map
+
+        if(markers[i].isSaved){
+            savedPlaces.push(markers[i]);
+        }
         markers[i].setMap(null);
     }
         markers.length = 0;
-    };
+}
 
-function callback(results, status) {
+function Callback(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0; i < results.length; ++i) {
@@ -224,7 +274,36 @@ function callback(results, status) {
         }
         map.fitBounds(bounds);
     }
-};
+}
+
+function ToggleSavedMarkers() {
+    //false = hide     true = show
+    if (toggleSavedPlaces == false) {
+        HideSavedMarkers();
+        toggleSavedPlaces = true;
+    } else {
+        ShowSavedMarkers();
+        toggleSavedPlaces = false;
+    }
+
+    // Sets the map on all markers in the array.
+    function SetAllMap(map) {
+        for (var i = 0; i < mySavedPlaces.length; i++) {
+            mySavedPlaces[i].setMap(map);
+        }
+    }
+
+    // Removes the markers from the map, but keeps them in the array.
+    function HideSavedMarkers() {
+        SetAllMap(null);
+    }
+
+    // Shows any markers currently in the array.
+    function ShowSavedMarkers() {
+        SetAllMap(map);
+    }
+}
+
 
 
 window.onload = LoadScript;
