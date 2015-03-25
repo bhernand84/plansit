@@ -4,7 +4,7 @@ var browserSupportFlag;
 var infowindow;
 var markers = [];
 var mySavedPlaces = [];
-var toggleSavedPlaces = true;
+var toggleSavedPlaces = false;
 
 function Initialize() {
     mapOptions = {
@@ -278,27 +278,28 @@ function Callback(results, status) {
 
 function ToggleSavedMarkers() {
     //false = hide     true = show
-    if (toggleSavedPlaces == false) {
-        HideSavedMarkers();
-        toggleSavedPlaces = true;
-    } else {
-        ShowSavedMarkers();
-        toggleSavedPlaces = false;
+    if(mySavedPlaces != null){
+        if (toggleSavedPlaces == false) {
+            HideSavedMarkers();
+            toggleSavedPlaces = true;
+        } else {
+            ShowSavedMarkers();
+            toggleSavedPlaces = false;
+        }
+    } else{
+
     }
 
-    // Sets the map on all markers in the array.
     function SetAllMap(map) {
         for (var i = 0; i < mySavedPlaces.length; i++) {
             mySavedPlaces[i].setMap(map);
         }
     }
 
-    // Removes the markers from the map, but keeps them in the array.
     function HideSavedMarkers() {
         SetAllMap(null);
     }
 
-    // Shows any markers currently in the array.
     function ShowSavedMarkers() {
         SetAllMap(map);
     }
