@@ -4,6 +4,7 @@ var browserSupportFlag;
 var infowindow;
 var markers = [];
 var mySavedPlaces = [];
+var toggleSavedPlaces = true;
 
 function Initialize() {
     mapOptions = {
@@ -17,14 +18,17 @@ function Initialize() {
     AttemptGeolocation();
 
     var input = (document.getElementById('pac-input'));
-    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
     var searchBox = new google.maps.places.SearchBox((input));
+    map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+    var autocomplete = new google.maps.places.Autocomplete(input);
+    autocomplete.bindTo('bounds', map);
 
     setTimeout(AddMapListeners(input, searchBox), 1);  
     map.setZoom(15);
 }
 
-function AddMapListeners(input, searchBox){
+function AddMapListeners(input, searchBox, types){
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
@@ -85,7 +89,7 @@ function IsAlreadySaved(place){
     else{
         place.isSaved = false;
     }
-};
+}
 
 function CreateMarker(placeResult, isSavedBool) {
     var placeLoc = placeResult.geometry.location;
@@ -246,7 +250,7 @@ function OpenInfoWindow(place, marker) {
     if (phone) {
         $('#bodyContent').append('<p class="phone">Phone: ' + phone + '</p>');
     }
-};
+}
 
 function ClearMarkers() {
     for (var i = 0; i < markers.length; i++ ) {
@@ -258,7 +262,7 @@ function ClearMarkers() {
         markers[i].setMap(null);
     }
         markers.length = 0;
-};
+}
 
 function Callback(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
@@ -270,7 +274,36 @@ function Callback(results, status) {
         }
         map.fitBounds(bounds);
     }
-};
+}
+
+function ToggleSavedMarkers() {
+    //false = hide     true = show
+    if (toggleSavedPlaces == false) {
+        HideSavedMarkers();
+        toggleSavedPlaces = true;
+    } else {
+        ShowSavedMarkers();
+        toggleSavedPlaces = false;
+    }
+
+    // Sets the map on all markers in the array.
+    function SetAllMap(map) {
+        for (var i = 0; i < mySavedPlaces.length; i++) {
+            mySavedPlaces[i].setMap(map);
+        }
+    }
+
+    // Removes the markers from the map, but keeps them in the array.
+    function HideSavedMarkers() {
+        SetAllMap(null);
+    }
+
+    // Shows any markers currently in the array.
+    function ShowSavedMarkers() {
+        SetAllMap(map);
+    }
+}
+
 
 
 window.onload = LoadScript;
