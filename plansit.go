@@ -1,3 +1,4 @@
+
 package plansit
 
 import(
@@ -9,12 +10,17 @@ import(
 )
 
 var (
-	indexTemplate = template.Must(template.ParseFiles("index.html"))
+	indexTemplate = template.Must(template.ParseFiles("views/index.html"))
+	mapperTemplate = template.Must(template.ParseFiles("views/mapper.html"))
 	currentUser plansitUser
 )
 func init(){
 	http.HandleFunc("/",root)
+	http.HandleFunc("/mapper", mapper)
 	http.HandleFunc("/place/add", addPlace)
+    http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
+        http.ServeFile(w, r, r.URL.Path[1:])
+    })
 }
 
 func root(w http.ResponseWriter, r *http.Request){
@@ -25,6 +31,10 @@ func root(w http.ResponseWriter, r *http.Request){
 	indexTemplate.Execute(w, currentUser.Email)
 }
 
+func mapper( w http.ResponseWriter, r *http.Request){
+	currentUser.checkAuth(w,r)
+	mapperTemplate.Execute(w, "")
+}
 func addPlace(w http.ResponseWriter, r * http.Request){
  	placeid, notes := r.FormValue("placeid"), r.FormValue("note")
  	currentUser.checkAuth(w, r)
