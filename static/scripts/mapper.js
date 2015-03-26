@@ -3,21 +3,24 @@ var mapOptions;
 var browserSupportFlag;
 var infowindow;
 var markers = [];
-var mySavedPlaces = [];
+var mySavedMarkers = [];
 var toggleSavedPlaces = false;
 
 var testPlaceArray =
                     [{id: 1,
+                    tripId: 1,
                     placeId: "ChIJK91CahTGxokRYexHytuYDbk",
                     notes: "Great local bar",
                     category:["Bar", "Dinner", "Happy Hour"]
                     },
                     {id: 2,
+                    tripId: 1,
                     placeId: "ChIJQ4HNIkDGxokRYxgH87uN53w",
                     notes: "Good Beer! Food is alright",
                     category:["Bar", "Happy Hour"]
                     },
                     {id: 3,
+                    tripId: 1,
                     placeId: "ChIJ6bNuLSnGxokR29Oj-g9Tojo",
                     notes: "Good reward points.  Nice view",
                     category:["Hotel"]
@@ -39,6 +42,7 @@ function Initialize() {
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
     var autocomplete = new google.maps.places.Autocomplete(input);
+    place = autocomplete.getPlace();
     autocomplete.bindTo('bounds', map);
 
     setTimeout(AddMapListeners(input, searchBox), 1);  
@@ -61,7 +65,6 @@ function AddMapListeners(input, searchBox, types){
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0, place; place = places[i]; i++) {
             CreateMarker(place);            
-            console.log('markers pushed');
             bounds.extend(place.geometry.location);
         }
 
@@ -100,18 +103,25 @@ function LoadSavedPlaces(myPlacesArray){
 }
 
 function IsAlreadySaved(place){
-    //savedPlaces is a collection of objects, not id's
     var savedPlacesIDs = [];
-    for(var i = 0; i < mySavedPlaces.length; i++){
-        savedPlacesIDs.push(mySavedPlaces[i].place_id);
+    if(mySavedMarkers.length==0){
+        place.isSaved = false;
+        console.log("Saved Places is Empty!!");
+        return false;
+    }
+    for(var i = 0; i < mySavedMarkers.length; i++){
+        savedPlacesIDs.push(mySavedMarkers[i].place.placeId);
     }
 
     if(savedPlacesIDs.indexOf(place.place_id)!= -1){
         place.isSaved = true;
         console.log("already saved");
+        return true;
     }
     else{
         place.isSaved = false;
+        console.log("not already saved");
+        return false;
     }
 }
 
@@ -144,10 +154,10 @@ function CreateMarker(placeResult, isSavedBool) {
         GetPlaceDetails(marker);
     });
     if(marker.isSaved){
-        mySavedPlaces.push(marker);
+        mySavedMarkers.push(marker);
     }
     else if(!marker.isSaved){
-    markers.push(marker);
+        markers.push(marker);
     };
 }
 
@@ -232,24 +242,25 @@ function GetPlaceDetails(marker) {
 
     service.getDetails(request, function (place, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
+            place.isSaved = IsAlreadySaved(place);
             OpenInfoWindow(place, marker);
         }
     });
 }
 
 function OpenInfoWindow(place, marker) {
+    console.log(place);
     google.maps.event.addListener(marker, 'click', function () {
         if (infowindow) {
-            console.log('found a window!');
             infowindow.close();
         }
     });
     google.maps.event.addListener(map, 'click', function () {
         if (infowindow) {
-            console.log('found a window!');
             infowindow.close();
         }
     });
+    var isSaved = (place.isSaved == null) ? null : place.isSaved;
     var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
@@ -273,6 +284,13 @@ function OpenInfoWindow(place, marker) {
     }
     if (phone) {
         $('#bodyContent').append('<p class="phone">Phone: ' + phone + '</p>');
+    }
+    if (!isSaved) {
+        $('#bodyContent').append('<button id="savePlace">Save To My Map</button>');
+        $('#savePlace').click(function(){
+            SavePlace(place);
+            console.log('Place Saved!');
+        });
     }
 }
 
@@ -311,8 +329,8 @@ function ToggleSavedMarkers() {
     }
 
     function SetAllMap(map) {
-        for (var i = 0; i < mySavedPlaces.length; i++) {
-            mySavedPlaces[i].setMap(map);
+        for (var i = 0; i < mySavedMarkers.length; i++) {
+            mySavedMarkers[i].setMap(map);
         }
     }
 
@@ -327,6 +345,7 @@ function ToggleSavedMarkers() {
 
 function SavePlace(place){
     //Save searched place to database, along with personal notes and detailed category
+    var idForDatabase = place.placeId
 }
 
 function EnableSavedMarkersToggle(){
