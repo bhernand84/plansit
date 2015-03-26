@@ -4,7 +4,7 @@
 		{{.Userid}}
 		{{.Email}}
 		{{range .Trips}}
-		<pre>{{.Place_id}} {{.Notes}}</pre>
+		<pre>{{.Name}} {{.Description}}</pre>
 		{{end}}
 		<div>
 			<form action="/place/add" method="Post">

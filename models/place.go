@@ -15,7 +15,7 @@ type PlansitUser struct {
 }
 
 type Trip struct{
-	Id string
+	Id int
 	Name string
 	DateCreated time.Time
 	Description string
@@ -53,7 +53,10 @@ func GetUser(userid string){
 	load(userid)
 }
 func AddTrip(name string, desc string, departure time.Time, length string){
-
+	id := 1
+	myTrip := Trip{id, name, time.Now(), desc, departure, length, nil}
+	CurrentUser.Trips = append(CurrentUser.Trips, myTrip)
+	save()
 }
 func RemoveTrip(id string){
 
