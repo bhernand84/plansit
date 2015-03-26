@@ -1,0 +1,29 @@
+package models;
+
+message PlansItProto{
+  required string GoogleId = 1;
+  required string Email = 2;
+  optional string name = 3;
+  repeated Trip trips = 4;
+
+
+message Trip{
+	  optional string name = 1;
+	  optional string dateCreated = 2; 
+	  optional string description = 3;
+	  optional string length =4;
+	  repeated Place places = 5;
+}
+
+message Place {
+	optional string placeId = 1;
+	optional string notes = 2; 
+	repeated Category categories = 3;
+}
+
+message Category{
+	optional string name = 1; 
+	optional string description = 2;
+}
+
+}

@@ -1,7 +1,9 @@
 <html>
 	<body>
 		<p>plansddit</p>
-		{{range .}}
+		{{.Userid}}
+		{{.Email}}
+		{{range .Trips}}
 		<pre>{{.Place_id}} {{.Notes}}</pre>
 		{{end}}
 		<div>
