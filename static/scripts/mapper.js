@@ -249,7 +249,6 @@ function GetPlaceDetails(marker) {
 }
 
 function OpenInfoWindow(place, marker) {
-    console.log(place);
     google.maps.event.addListener(marker, 'click', function () {
         if (infowindow) {
             infowindow.close();
@@ -287,8 +286,26 @@ function OpenInfoWindow(place, marker) {
     }
     if (!isSaved) {
         $('#bodyContent').append('<button id="savePlace">Save To My Map</button>');
+
+        
+
         $('#savePlace').click(function(){
+            var notes = prompt("Enter any notes you may want to store");
+            
+            $(function() {
+                console.log(modalText);
+                var modalText = '<div id="dialog" title="Basic dialog">' +
+                            '<p>This is the place you add your text</p>' + 
+                        '</div>';
+                $(modalText).dialog();
+            });
+
+            
+
+            
+
             SavePlace(place);
+            console.log(place);
             console.log('Place Saved!');
         });
     }
@@ -346,6 +363,11 @@ function ToggleSavedMarkers() {
 function SavePlace(place){
     //Save searched place to database, along with personal notes and detailed category
     var idForDatabase = place.placeId
+    var placeForDatabase = {
+                            placeId: place.place_id,
+                            notes: place.myNotes,
+                            category: []
+                            };
 }
 
 function EnableSavedMarkersToggle(){
