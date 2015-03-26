@@ -4,6 +4,7 @@
 		{{.Userid}}
 		{{.Email}}
 		{{range .Trips}}
+		<p>mytrip</p>
 		<pre>{{.Name}} {{.Description}}</pre>
 		{{end}}
 		<div>
@@ -14,6 +15,10 @@
 			</form>	
 			<form action="trip/add" method="Post">
 				<input name="name" type="textbox"/>
+				<input name="description" type="textbox"/>
+				<input name="departure" type="textbox"/>
+				<input name="length" type="textbox"/>
+				<input type="submit" value="add trip"/>
 			</form>
 	</body>
 </html>

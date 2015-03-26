@@ -23,8 +23,8 @@ var _ = math.Inf
 type PlansItProto struct {
 	GoogleId         *string              `protobuf:"bytes,1,req" json:"GoogleId,omitempty"`
 	Email            *string              `protobuf:"bytes,2,req" json:"Email,omitempty"`
-	Name             *string              `protobuf:"bytes,3,opt,name=name" json:"name,omitempty"`
-	Trips            []*PlansItProto_Trip `protobuf:"bytes,4,rep,name=trips" json:"trips,omitempty"`
+	Name             *string              `protobuf:"bytes,3,opt" json:"Name,omitempty"`
+	Trips            []*PlansItProto_Trip `protobuf:"bytes,4,rep" json:"Trips,omitempty"`
 	XXX_unrecognized []byte               `json:"-"`
 }
 
@@ -61,12 +61,13 @@ func (m *PlansItProto) GetTrips() []*PlansItProto_Trip {
 }
 
 type PlansItProto_Trip struct {
-	Id               *string               `protobuf:"bytes,1,req,name=id" json:"id,omitempty"`
-	Name             *string               `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	DateCreated      *string               `protobuf:"bytes,3,opt,name=dateCreated" json:"dateCreated,omitempty"`
-	Description      *string               `protobuf:"bytes,4,opt,name=description" json:"description,omitempty"`
-	Length           *string               `protobuf:"bytes,5,opt,name=length" json:"length,omitempty"`
-	Places           []*PlansItProto_Place `protobuf:"bytes,6,rep,name=places" json:"places,omitempty"`
+	Id               *string               `protobuf:"bytes,1,req" json:"Id,omitempty"`
+	Name             *string               `protobuf:"bytes,2,opt" json:"Name,omitempty"`
+	DateCreated      *string               `protobuf:"bytes,3,opt" json:"DateCreated,omitempty"`
+	Departure        *string               `protobuf:"bytes,4,opt" json:"Departure,omitempty"`
+	Description      *string               `protobuf:"bytes,5,opt" json:"Description,omitempty"`
+	Length           *string               `protobuf:"bytes,6,opt" json:"Length,omitempty"`
+	Places           []*PlansItProto_Place `protobuf:"bytes,7,rep" json:"Places,omitempty"`
 	XXX_unrecognized []byte                `json:"-"`
 }
 
@@ -95,6 +96,13 @@ func (m *PlansItProto_Trip) GetDateCreated() string {
 	return ""
 }
 
+func (m *PlansItProto_Trip) GetDeparture() string {
+	if m != nil && m.Departure != nil {
+		return *m.Departure
+	}
+	return ""
+}
+
 func (m *PlansItProto_Trip) GetDescription() string {
 	if m != nil && m.Description != nil {
 		return *m.Description
@@ -117,9 +125,9 @@ func (m *PlansItProto_Trip) GetPlaces() []*PlansItProto_Place {
 }
 
 type PlansItProto_Place struct {
-	PlaceId          *string                  `protobuf:"bytes,1,opt,name=placeId" json:"placeId,omitempty"`
-	Notes            *string                  `protobuf:"bytes,2,opt,name=notes" json:"notes,omitempty"`
-	Categories       []*PlansItProto_Category `protobuf:"bytes,3,rep,name=categories" json:"categories,omitempty"`
+	PlaceId          *string                  `protobuf:"bytes,1,opt" json:"PlaceId,omitempty"`
+	Notes            *string                  `protobuf:"bytes,2,opt" json:"Notes,omitempty"`
+	Categories       []*PlansItProto_Category `protobuf:"bytes,3,rep" json:"Categories,omitempty"`
 	XXX_unrecognized []byte                   `json:"-"`
 }
 
@@ -149,8 +157,8 @@ func (m *PlansItProto_Place) GetCategories() []*PlansItProto_Category {
 }
 
 type PlansItProto_Category struct {
-	Name             *string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	Description      *string `protobuf:"bytes,2,opt,name=description" json:"description,omitempty"`
+	Name             *string `protobuf:"bytes,1,opt" json:"Name,omitempty"`
+	Description      *string `protobuf:"bytes,2,opt" json:"Description,omitempty"`
 	XXX_unrecognized []byte  `json:"-"`
 }
 

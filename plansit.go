@@ -18,6 +18,7 @@ func init(){
 	http.HandleFunc("/",root)
 	http.HandleFunc("/mapper", mapper)
 	http.HandleFunc("/place/add", addPlace)
+	http.HandleFunc("/trip/add", addTrip)
     http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
         http.ServeFile(w, r, r.URL.Path[1:])
     })
@@ -40,6 +41,12 @@ func addPlace(w http.ResponseWriter, r * http.Request){
  	r.FormValue("tripid")
  	models.Init(appengine.NewContext(r))
  	models.AddPlace(tripid, placeid,notes)	
+}
+func addTrip(w http.ResponseWriter, r * http.Request){
+ 	name, description, departure, length := r.FormValue("name"), r.FormValue("description") ,
+ 	r.FormValue("departure"), r.FormValue("length") 
+ 	models.Init(appengine.NewContext(r))
+ 	models.AddTrip(name, description, departure, length)	
 }
 
 func checkAuth(w http.ResponseWriter, r *http.Request){ 

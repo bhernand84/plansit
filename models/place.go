@@ -6,6 +6,7 @@ import(
 	"appengine/datastore"
 	"appengine/user"
 	"github.com/golang/protobuf/proto"
+	"strconv"
 )
 type PlansitUser struct {
 	Userid string
@@ -19,7 +20,7 @@ type Trip struct{
 	Name string
 	DateCreated time.Time
 	Description string
-	Departure time.Time
+	Departure string
 	Length	string
 	Places []Place
 }
@@ -52,7 +53,7 @@ func create(userid string, name string, email string) *PlansitUser{
 func GetUser(userid string){
 	load(userid)
 }
-func AddTrip(name string, desc string, departure time.Time, length string){
+func AddTrip(name string, desc string, departure string, length string){
 	id := 1
 	myTrip := Trip{id, name, time.Now(), desc, departure, length, nil}
 	CurrentUser.Trips = append(CurrentUser.Trips, myTrip)
@@ -89,6 +90,16 @@ func  load (userid string) {
 			return
 		}
 		CurrentUser = &PlansitUser{protoUser.GetGoogleId(), protoUser.GetName(), protoUser.GetEmail(), nil}
+		for _, trip := range protoUser.Trips {
+			tripid, err := strconv.Atoi(trip.GetId())
+			tripcreated, error:=  time.Parse(time.RFC3339, trip.GetDateCreated())
+			if err == nil && error == nil {
+
+			plansitTrip:= Trip{tripid, trip.GetName(),tripcreated, trip.GetDescription(), trip.GetDeparture(), trip.GetLength(), nil}
+			CurrentUser.Trips = append(CurrentUser.Trips, plansitTrip)
+			C.Infof("%v", CurrentUser.Trips)
+			}
+		}
 	}
 		
 }
@@ -97,6 +108,17 @@ func save(){
 	protoUser := new(PlansItProto)
 	protoUser.GoogleId = proto.String(CurrentUser.Userid)
 	protoUser.Email = proto.String(CurrentUser.Email)
+
+	for _,trip := range CurrentUser.Trips{
+		protoTrip := new(PlansItProto_Trip)
+		protoTrip.Id = proto.String(strconv.Itoa(trip.Id))
+		protoTrip.Name = proto.String(trip.Name)
+		protoTrip.DateCreated = proto.String(time.Now().Format(time.RFC3339))
+		protoTrip.Description = proto.String(trip.Description)
+		protoTrip.Departure = proto.String(trip.Departure)
+		protoTrip.Length = proto.String(trip.Length)
+		protoUser.Trips = append(protoUser.Trips, protoTrip)
+	}
 	data, err := proto.Marshal(protoUser)
 	if err != nil {
 		C.Infof("marshaling error: ", err)
