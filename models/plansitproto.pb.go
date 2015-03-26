@@ -61,17 +61,25 @@ func (m *PlansItProto) GetTrips() []*PlansItProto_Trip {
 }
 
 type PlansItProto_Trip struct {
-	Name             *string               `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-	DateCreated      *string               `protobuf:"bytes,2,opt,name=dateCreated" json:"dateCreated,omitempty"`
-	Description      *string               `protobuf:"bytes,3,opt,name=description" json:"description,omitempty"`
-	Length           *string               `protobuf:"bytes,4,opt,name=length" json:"length,omitempty"`
-	Places           []*PlansItProto_Place `protobuf:"bytes,5,rep,name=places" json:"places,omitempty"`
+	Id               *string               `protobuf:"bytes,1,req,name=id" json:"id,omitempty"`
+	Name             *string               `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+	DateCreated      *string               `protobuf:"bytes,3,opt,name=dateCreated" json:"dateCreated,omitempty"`
+	Description      *string               `protobuf:"bytes,4,opt,name=description" json:"description,omitempty"`
+	Length           *string               `protobuf:"bytes,5,opt,name=length" json:"length,omitempty"`
+	Places           []*PlansItProto_Place `protobuf:"bytes,6,rep,name=places" json:"places,omitempty"`
 	XXX_unrecognized []byte                `json:"-"`
 }
 
 func (m *PlansItProto_Trip) Reset()         { *m = PlansItProto_Trip{} }
 func (m *PlansItProto_Trip) String() string { return proto.CompactTextString(m) }
 func (*PlansItProto_Trip) ProtoMessage()    {}
+
+func (m *PlansItProto_Trip) GetId() string {
+	if m != nil && m.Id != nil {
+		return *m.Id
+	}
+	return ""
+}
 
 func (m *PlansItProto_Trip) GetName() string {
 	if m != nil && m.Name != nil {

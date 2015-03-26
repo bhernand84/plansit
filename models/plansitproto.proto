@@ -8,11 +8,12 @@ message PlansItProto{
 
 
 message Trip{
-	  optional string name = 1;
-	  optional string dateCreated = 2; 
-	  optional string description = 3;
-	  optional string length =4;
-	  repeated Place places = 5;
+	  required string id = 1;
+	  optional string name = 2;
+	  optional string dateCreated = 3; 
+	  optional string description = 4;
+	  optional string length =5;
+	  repeated Place places = 6;
 }
 
 message Place {
