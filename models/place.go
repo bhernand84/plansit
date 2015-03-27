@@ -59,14 +59,31 @@ func AddTrip(name string, desc string, departure string, length string){
 	CurrentUser.Trips = append(CurrentUser.Trips, myTrip)
 	save()
 }
-func RemoveTrip(id string){
-
+func RemoveTrip(id int){
+	tripIndex := getIndexOfTrip(id)
+	if tripIndex == -1{
+		return
+	}
+	CurrentUser.Trips = append(CurrentUser.Trips[:tripIndex], CurrentUser.Trips[tripIndex +1:]...)
+	save()
 }
-func GetTrip(id string) *Trip{
-	return &CurrentUser.Trips[0]
+func GetTrip(id int) *Trip{
+	tripIndex := getIndexOfTrip(id)
+	if tripIndex == -1 { 
+		return nil
+	}
+	return &CurrentUser.Trips[tripIndex]
+}
+func getIndexOfTrip(id int) int{
+	for index, trip := range CurrentUser.Trips{
+		if trip.Id == id {
+			return index
+		}
+	}
+	return -1
 }
 
-func AddPlace(tripid string, placeId string, notes string){
+func AddPlace(tripid int, placeId string, notes string){
 	trip := GetTrip(tripid)
 	if trip !=nil{
 		place := Place{placeId,notes, CurrentUser.Userid}
@@ -74,7 +91,7 @@ func AddPlace(tripid string, placeId string, notes string){
 		save()
 	}
 }
-func GetPlaces(tripID string) []Place {
+func GetPlaces(tripID int) []Place {
 	return GetTrip(tripID).Places
 }
 func RemovePlace(placeId string, tripName string){

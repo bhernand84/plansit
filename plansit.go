@@ -7,6 +7,7 @@ import(
 	"models"
 	"appengine"
 _	"time"
+	"strconv"
 )
 
 var (
@@ -19,10 +20,11 @@ func init(){
 	http.HandleFunc("/mapper", mapper)
 	http.HandleFunc("/place/add", addPlace)
 	http.HandleFunc("/trip/add", addTrip)
+	http.HandleFunc("/trip/remove", removeTrip)
     http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
         http.ServeFile(w, r, r.URL.Path[1:])
     })
-}
+} 
 
 func root(w http.ResponseWriter, r *http.Request){
 	checkAuth(w,r)
@@ -39,14 +41,24 @@ func mapper( w http.ResponseWriter, r *http.Request){
 func addPlace(w http.ResponseWriter, r * http.Request){
  	placeid, notes, tripid := r.FormValue("placeid"), r.FormValue("notes") ,
  	r.FormValue("tripid")
- 	models.Init(appengine.NewContext(r))
- 	models.AddPlace(tripid, placeid,notes)	
+ 	intTripId, error := strconv.Atoi(tripid)
+ 	if error == nil{
+	 	models.Init(appengine.NewContext(r))
+	 	models.AddPlace(intTripId, placeid,notes)	
+	}
 }
 func addTrip(w http.ResponseWriter, r * http.Request){
  	name, description, departure, length := r.FormValue("name"), r.FormValue("description") ,
  	r.FormValue("departure"), r.FormValue("length") 
  	models.Init(appengine.NewContext(r))
  	models.AddTrip(name, description, departure, length)	
+}
+func removeTrip(w http.ResponseWriter, r *http.Request){
+	tripid, err:= strconv.Atoi(r.FormValue("tripid"))
+	if err ==nil{
+		models.Init(appengine.NewContext(r))
+		models.RemoveTrip(tripid)
+	}
 }
 
 func checkAuth(w http.ResponseWriter, r *http.Request){ 
