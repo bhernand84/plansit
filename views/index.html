@@ -5,10 +5,14 @@
 		{{.Email}}
 		{{range .Trips}}
 		<p>mytrip</p>
-		<pre>{{.Name}} {{.Description}}</pre>
+		<pre>{{.Id}} {{.Name}} {{.Description}}</pre>
+			{{range .Places}}
+			<p>{{.Placeid}} - {{.Notes}}</p>
+			{{end}}
 		{{end}}
 		<div>
 			<form action="/place/add" method="Post">
+				<input name="tripid" type="textbox"/>
 				<input name="placeid" type="textbox"/>
 				<input name="notes" type="textbox"/>
 				<input type="submit" value="add place"/>

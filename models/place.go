@@ -10,7 +10,7 @@ import(
 )
 type PlansitUser struct {
 	Userid string
-	Name string
+		Name string
 	Email string
 	Trips []Trip
 }
@@ -62,29 +62,31 @@ func AddTrip(name string, desc string, departure string, length string){
 func RemoveTrip(id string){
 
 }
-func GetTrip(id string) Trip{
-	return CurrentUser.Trips[0]
+func GetTrip(id string) *Trip{
+	return &CurrentUser.Trips[0]
 }
 
 func AddPlace(tripid string, placeId string, notes string){
-	//add place here
+	trip := GetTrip(tripid)
+	if trip !=nil{
+		place := Place{placeId,notes, CurrentUser.Userid}
+		trip.Places = append(trip.Places, place)
+		save()
+	}
 }
 func GetPlaces(tripID string) []Place {
 	return GetTrip(tripID).Places
 }
 func RemovePlace(placeId string, tripName string){
 }
-func  load (userid string) { 
-	q := datastore.NewQuery("User").Ancestor(userKey(C)).Filter("UserID=", userid)
-	var newUsers []DBCommit;
-	_, err  := q.GetAll(C, &newUsers)
-	if err != nil{
-		return 
-	}
-	if newUsers != nil{
-		data := newUsers[0].UserData
+func load (userid string) { 
+	var user DBCommit		
+	error := datastore.Get(C, userKey(C, userid), &user)
+
+	if error == nil{
+		data := user.UserData
 		protoUser := new(PlansItProto)
-		err = proto.Unmarshal(data, protoUser)
+		err := proto.Unmarshal(data, protoUser)
 		if err != nil {
 			C.Infof("unmarshaling error: ", err)
 			return
@@ -94,10 +96,12 @@ func  load (userid string) {
 			tripid, err := strconv.Atoi(trip.GetId())
 			tripcreated, error:=  time.Parse(time.RFC3339, trip.GetDateCreated())
 			if err == nil && error == nil {
-
 			plansitTrip:= Trip{tripid, trip.GetName(),tripcreated, trip.GetDescription(), trip.GetDeparture(), trip.GetLength(), nil}
+			for _, place := range trip.Places{
+				plansitPlace := Place{place.GetPlaceId(), place.GetNotes(), CurrentUser.Userid}
+				plansitTrip.Places = append(plansitTrip.Places, plansitPlace)
+			}
 			CurrentUser.Trips = append(CurrentUser.Trips, plansitTrip)
-			C.Infof("%v", CurrentUser.Trips)
 			}
 		}
 	}
@@ -117,22 +121,30 @@ func save(){
 		protoTrip.Description = proto.String(trip.Description)
 		protoTrip.Departure = proto.String(trip.Departure)
 		protoTrip.Length = proto.String(trip.Length)
+
+		for _, place := range trip.Places{
+			protoPlace := new(PlansItProto_Place)
+			protoPlace.PlaceId = proto.String(place.Placeid)
+			protoPlace.Notes = proto.String(place.Notes)
+			protoTrip.Places = append(protoTrip.Places, protoPlace)
+		}
 		protoUser.Trips = append(protoUser.Trips, protoTrip)
 	}
+
 	data, err := proto.Marshal(protoUser)
 	if err != nil {
 		C.Infof("marshaling error: ", err)
 	}
 	dbObject := &DBCommit{CurrentUser.Userid, data}
 	
-	key := datastore.NewIncompleteKey(C, "User", userKey(C))
+	key := userKey(C, CurrentUser.Userid)
 	_, error := datastore.Put(C, key, dbObject)
     if error !=nil{
     	C.Infof(error.Error())
     	return
     }
 }
-func userKey(c appengine.Context) *datastore.Key {
-        return datastore.NewKey(c, "User", "default_user", 0, nil)
+func userKey(c appengine.Context, userid string) *datastore.Key {
+        return datastore.NewKey(c, "User", userid,  0, nil)
 }
 
