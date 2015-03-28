@@ -5,6 +5,7 @@ var infowindow;
 var markers = [];
 var mySavedMarkers = [];
 var toggleSavedPlaces = false;
+var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing"];
 
 var testPlaceArray =
                     [{id: 1,
@@ -264,13 +265,13 @@ function OpenInfoWindow(place, marker) {
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
     var contentString = '<div class="detailWindow">' +
-   '<div id="siteNotice">' +
-   '</div>' +
-   '<h3 id="firstHeading" class="firstHeading">' + place.name + '</h3>' +
-   '<div id="bodyContent">' +
-   '<h5 class="address">' + place.formatted_address + '</h5>' +
-    '</div>' +
-    '</div>';
+                            '<div id="siteNotice">' +
+                            '</div>' +
+                            '<h3 id="firstHeading" class="firstHeading">' + place.name + '</h3>' +
+                                '<div id="bodyContent">' +
+                                    '<h5 class="address">' + place.formatted_address + '</h5>' +
+                                '</div>' +
+                        '</div>';
 
     infowindow.setContent(contentString);
     infowindow.open(map, marker);
@@ -290,25 +291,54 @@ function OpenInfoWindow(place, marker) {
         
 
         $('#savePlace').click(function(){
-            var notes = prompt("Enter any notes you may want to store");
-            
             $(function() {
-                console.log(modalText);
-                var modalText = '<div id="dialog" title="Basic dialog">' +
-                            '<p>This is the place you add your text</p>' + 
-                        '</div>';
-                $(modalText).dialog();
+                infowindow.close();
+                var categoryList = CreateCategoryList();
+                var modalText = $('<form id="dialog" title="'+place.name+'">' +
+                                    '<div>' +
+                                        '<textarea id="myNotes" rows="3" cols="27" placeholder="Save your notes here..."></textarea>' +
+                                    '</div>' +
+                                    categoryList.html() + '<input type="submit" value="Submit">' +
+                                '</form>');
+                modalText.dialog();
+
+                modalText.submit(function(){
+                    var listOfCheckedBoxes = $('input[name="category"]:checked');
+                    console.log(listOfCheckedBoxes)
+                    var myNotes = document.getElementById("myNotes").value;
+                    var arrayForPlace = [];
+                    for(var i = 0; i < listOfCheckedBoxes.length; i++){
+                        arrayForPlace.push(listOfCheckedBoxes[i].value);
+                    };
+
+                    place.category = arrayForPlace;
+                    place.notes = myNotes;
+                    console.log(arrayForPlace);
+                    console.log(place);
+                    arrayForPlace = [];
+                    listOfCheckedBoxes = null;
+                    myNotes = null;
+
+                    modalText.dialog('destroy').remove();
+                    return false;
+                });
             });
-
             
-
-            
-
             SavePlace(place);
-            console.log(place);
-            console.log('Place Saved!');
+            
         });
     }
+}
+
+function CreateCategoryList(){
+    var listForHtml = $('<ul type="none" id="listOfCategories"></ul>')
+    if(categories.length!=0){
+        for(var i = 0; i < categories.length; i++){
+            var listItem = '<li>' + '<input type="checkbox" name="category" value="'+categories[i]+'">' + categories[i] + '</li>';
+            listForHtml.append(listItem);
+        }
+        return listForHtml;
+    };   
 }
 
 function ClearMarkers() {
