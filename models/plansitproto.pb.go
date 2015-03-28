@@ -125,15 +125,23 @@ func (m *PlansItProto_Trip) GetPlaces() []*PlansItProto_Place {
 }
 
 type PlansItProto_Place struct {
-	PlaceId          *string                  `protobuf:"bytes,1,opt" json:"PlaceId,omitempty"`
-	Notes            *string                  `protobuf:"bytes,2,opt" json:"Notes,omitempty"`
-	Categories       []*PlansItProto_Category `protobuf:"bytes,3,rep" json:"Categories,omitempty"`
+	Id               *string                  `protobuf:"bytes,1,req" json:"Id,omitempty"`
+	PlaceId          *string                  `protobuf:"bytes,2,opt" json:"PlaceId,omitempty"`
+	Notes            *string                  `protobuf:"bytes,3,opt" json:"Notes,omitempty"`
+	Categories       []*PlansItProto_Category `protobuf:"bytes,4,rep" json:"Categories,omitempty"`
 	XXX_unrecognized []byte                   `json:"-"`
 }
 
 func (m *PlansItProto_Place) Reset()         { *m = PlansItProto_Place{} }
 func (m *PlansItProto_Place) String() string { return proto.CompactTextString(m) }
 func (*PlansItProto_Place) ProtoMessage()    {}
+
+func (m *PlansItProto_Place) GetId() string {
+	if m != nil && m.Id != nil {
+		return *m.Id
+	}
+	return ""
+}
 
 func (m *PlansItProto_Place) GetPlaceId() string {
 	if m != nil && m.PlaceId != nil {

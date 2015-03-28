@@ -18,9 +18,10 @@ message Trip{
 }
 
 message Place {
-	optional string PlaceId = 1;
-	optional string Notes = 2; 
-	repeated Category Categories = 3;
+	required string Id = 1;
+	optional string PlaceId = 2;
+	optional string Notes = 3; 
+	repeated Category Categories = 4;
 }
 
 message Category{
