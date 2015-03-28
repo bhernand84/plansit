@@ -8,31 +8,6 @@ import(
 	"github.com/golang/protobuf/proto"
 	"strconv"
 )
-type PlansitUser struct {
-	Userid string
-		Name string
-	Email string
-	Trips []Trip
-}
-
-type Trip struct{
-	Id int
-	Name string
-	DateCreated time.Time
-	Description string
-	Departure string
-	Length	string
-	Places []Place
-}
-type Place struct{
-	Placeid string
-	Notes string
-	UserID string
-}
-type DBCommit struct{
-	UserID string
-	UserData []byte
-}
 
 var CurrentUser *PlansitUser
 var C appengine.Context
