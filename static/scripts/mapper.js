@@ -7,6 +7,7 @@ var markers = [];
 var mySavedMarkers = [];
 var toggleSavedPlaces = false;
 var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
+var myTripId;
 
 var testPlaceArray =
                     [{id: 1,
@@ -181,12 +182,16 @@ function AddMarkerToSavedPlacesIfNotAlready(marker){
     };
     if(!savedIds.indexOf(marker.place.place_id) > -1){
         mySavedMarkers.push(marker);
+        savedIds = [];
+        savedIds.length = 0;
+        return marker;
     }
     else{
         marker.setMap(null);
+        savedIds = [];
+        savedIds.length = 0;
+        return null;
     };
-    savedIds = [];
-    savedIds.length = 0;
 }
 
 function HandleNoGeolocation(errorFlag) {
@@ -339,37 +344,41 @@ function OpenInfoWindow(place, marker) {
 
                     place.category = arrayForPlace;
                     place.notes = myNotes;
+                    place.isSaved = true;
+
                     arrayForPlace = [];
                     listOfCheckedBoxes = null;
                     myNotes = null;
 
+                    SavePlace(place);
                     modalText.dialog('destroy').remove();
                     return false;
                 });
-            
-            
-            SavePlace(place);
-            
         });
     }
 }
 
 function SavePlace(place){
-    //Save searched place to database, along with personal notes and detailed category
-    //also add to savedMarkersArray as well as flip any bools needed
+    console.log(place);
+    myTripId = CurrentUser.trips[0].tripid;
+
     DeleteMarkerByPlaceId(place);
-    place.isSaved = true;
-    place.tripId = CurrentUser.trips.tripId;
+    place.tripId = myTripId;
     console.log(place);
     var newMarker = CreateMarker(place);
-    AddMarkerToSavedPlacesIfNotAlready(newMarker);
-    var idForDatabase = place.placeId;
-    var placeForDatabase = {
-                            placeId: place.place_id,
-                            notes: place.myNotes,
-                            category: place.category,
-                            tripId: place.tripId
-                            };
+    newMarker = AddMarkerToSavedPlacesIfNotAlready(newMarker);
+    
+    var newTripId = place.tripId;
+    var newPlaceId = place.place_id;
+    var newNotes = place.notes;
+    var newCategory = place.category;
+    console.log(newTripId);
+    console.log(newPlaceId);
+    console.log(newNotes);
+    console.log(newCategory);
+                            
+    plansItDB.AddPlace(newTripId, newPlaceId, newNotes, newCategory);
+    console.log("place saved");
 }
 
 function CreateCategoryList(){

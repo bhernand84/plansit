@@ -5,7 +5,7 @@ var plansItDB = {
 	LoadUserObject: function(userDBData){
 		CurrentUser = userDBData;
 	},
-	AddPlace: function(tripid, placeid, notes,categories){
+	AddPlace: function(tripid, placeid, notes, categories){
 		$.ajax({
 			type: "Post",
 			data: {
