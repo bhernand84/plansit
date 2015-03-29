@@ -1,6 +1,32 @@
 <html>
+
+
 	<body>
 		<p>plansddit</p>
-		<pre>{{.}}</pre>
+		{{.Userid}}
+		{{.Email}}
+		{{range .Trips}}
+		<p>mytrip</p>
+		<pre>{{.Id}} {{.Name}} {{.Description}}</pre>
+			{{range .Places}}
+			<p>{{.Placeid}} - {{.Notes}}</p>
+			{{end}}
+		{{end}}
+		<div>
+			<form action="trip/add" method="Post">
+				<input name="name" type="textbox"/>
+				<input name="description" type="textbox"/>
+				<input name="departure" type="textbox"/>
+				<input name="length" type="textbox"/>
+				<input type="submit" value="add trip"/>
+			</form>
+			<form action="/place/add" method="Post">
+				<input name="tripid" type="textbox"/>
+				<input name="placeid" type="textbox"/>
+				<input name="notes" type="textbox"/>
+				<input type="submit" value="add place"/>
+			</form>	
+    <script src="/static/scripts/jquery-1.10.2.js"></script>
+    <script src="/static/scripts/plansitDb.js"></script>
 	</body>
 </html>
