@@ -6,63 +6,85 @@ import(
 	"html/template"
 	"models"
 	"appengine"
-	"appengine/user"
+_	"time"
+	"strconv"
+	"encoding/json"
 )
 
 var (
 	indexTemplate = template.Must(template.ParseFiles("views/index.html"))
 	mapperTemplate = template.Must(template.ParseFiles("views/mapper.html"))
-	currentUser plansitUser
+	currentUser *models.PlansitUser
 )
 func init(){
 	http.HandleFunc("/",root)
 	http.HandleFunc("/mapper", mapper)
 	http.HandleFunc("/place/add", addPlace)
+	http.HandleFunc("/trip/add", addTrip)
+	http.HandleFunc("/trip/remove", removeTrip)
+	http.HandleFunc("/trip/get", getTrip)
+	http.HandleFunc("/user/get", getUser)
     http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
         http.ServeFile(w, r, r.URL.Path[1:])
     })
-}
+} 
 
 func root(w http.ResponseWriter, r *http.Request){
-	currentUser.checkAuth(w,r)
-	myPlace := &places.Place{}
-	myPlace.Add("hello", "009090920")
+	checkAuth(w,r)
+	models.Init(appengine.NewContext(r))
+	myUser := models.CurrentUser
 
-	indexTemplate.Execute(w, currentUser.Email)
+	indexTemplate.Execute(w, myUser)
 }
 
 func mapper( w http.ResponseWriter, r *http.Request){
-	currentUser.checkAuth(w,r)
+	checkAuth(w,r)
 	mapperTemplate.Execute(w, "")
 }
+
 func addPlace(w http.ResponseWriter, r * http.Request){
- 	placeid, notes := r.FormValue("placeid"), r.FormValue("note")
- 	currentUser.checkAuth(w, r)
- 	indexTemplate.Execute(w, placeid +  " "  + notes)
-
+ 	placeid, notes, tripid := r.FormValue("placeid"), r.FormValue("notes") ,
+ 	r.FormValue("tripid")
+ 	intTripId, error := strconv.Atoi(tripid)
+ 	if error == nil{
+	 	models.Init(appengine.NewContext(r))
+	 	models.AddPlace(intTripId, placeid,notes)	
+	}
+}	
+func getTrip(w http.ResponseWriter, r *http.Request){
+	tripid, err := strconv.Atoi(r.FormValue("tripid"))
+	if err == nil {
+		models.Init(appengine.NewContext(r))
+		trip := models.GetTrip(tripid)
+		json.NewEncoder(w).Encode(trip)
+	}
+}
+func getUser(w http.ResponseWriter, r *http.Request){
+		models.Init(appengine.NewContext(r))
+		user := models.CurrentUser
+		json.NewEncoder(w).Encode(user)
+}
+func addTrip(w http.ResponseWriter, r * http.Request){
+ 	name, description, departure, length := r.FormValue("name"), r.FormValue("description") ,
+ 	r.FormValue("departure"), r.FormValue("length") 
+ 	models.Init(appengine.NewContext(r))
+ 	models.AddTrip(name, description, departure, length)	
+}
+func removeTrip(w http.ResponseWriter, r *http.Request){
+	tripid, err:= strconv.Atoi(r.FormValue("tripid"))
+	if err ==nil{
+		models.Init(appengine.NewContext(r))
+		models.RemoveTrip(tripid)
+	}
 }
 
-type plansitUser struct {
-	Userid string
-	Name string
-	Email string
-}
-
-func (currentUser *plansitUser) checkAuth(w http.ResponseWriter, r *http.Request){ 
+func checkAuth(w http.ResponseWriter, r *http.Request){ 
 	c:= appengine.NewContext(r)
-	u:= user.Current(c)
-	if u == nil {
-        url, err := user.LoginURL(c, r.URL.String())
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-            return
-        }
-        w.Header().Set("Location", url)
-        w.WriteHeader(http.StatusFound)
-        return 
-    }
-    currentUser.Userid = u.ID
-    currentUser.Email = u.Email
-
+	models.Init(c)
 }
+
+
+
+
+
 
