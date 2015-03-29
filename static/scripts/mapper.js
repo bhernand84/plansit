@@ -6,6 +6,7 @@ var markers = [];
 var mySavedMarkers = [];
 var toggleSavedPlaces = false;
 var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing"];
+var tripId = 1;
 
 var testPlaceArray =
                     [{id: 1,
@@ -92,10 +93,11 @@ function LoadSavedPlaces(myPlacesArray){
             };
             service.getDetails(request, function (place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
-                    CreateMarker(place, isSavedBool);
-                    console.log(place.geometry.location);
+                    var newMarker = CreateMarker(place, isSavedBool);
                     bounds.extend(place.geometry.location);
+                    AddMarkerToSavedPlacesIfNotAlready(marker);
                     map.fitBounds(bounds);
+                    console.log(newMarker);
                 }
             });            
         }
@@ -110,19 +112,21 @@ function IsAlreadySaved(place){
         console.log("Saved Places is Empty!!");
         return false;
     }
-    for(var i = 0; i < mySavedMarkers.length; i++){
-        savedPlacesIDs.push(mySavedMarkers[i].place.placeId);
-    }
+    else if(mySavedMarkers.length>0){
+        for(var i = 0; i < mySavedMarkers.length; i++){
+            savedPlacesIDs.push(mySavedMarkers[i].place.placeId);
+        }
 
-    if(savedPlacesIDs.indexOf(place.place_id)!= -1){
-        place.isSaved = true;
-        console.log("already saved");
-        return true;
-    }
-    else{
-        place.isSaved = false;
-        console.log("not already saved");
-        return false;
+        if(savedPlacesIDs.indexOf(place.place_id)!= -1){
+            place.isSaved = true;
+            console.log("already saved");
+            return true;
+        }
+        else{
+            place.isSaved = false;
+            console.log("not already saved");
+            return false;
+            }
     }
 }
 
@@ -149,17 +153,40 @@ function CreateMarker(placeResult, isSavedBool) {
 
     if(isSavedBool!=null){
         marker.isSaved = true;
+        marker.tripId = tripId;
     };
+
+    if(marker.isSaved==true){
+        AddMarkerToSavedPlacesIfNotAlready(marker);
+        marker.setMap(null);
+    }
+
+    if(marker.isSaved==false){
+        markers.push(marker);
+    }
+
 
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
     });
-    if(marker.isSaved){
+    return marker;
+}
+
+function AddMarkerToSavedPlacesIfNotAlready(marker){
+    //check its id against all id's in the savedArray.  If its not there, add it
+    var savedIds = [];
+    for(var i = 0; i < mySavedMarkers.length; i++){
+        var singleId = mySavedMarkers[i].place.place_id;
+        savedIds.push(singleId);
+    };
+    if(!savedIds.indexOf(marker.place.place_id) > -1){
         mySavedMarkers.push(marker);
     }
-    else if(!marker.isSaved){
-        markers.push(marker);
+    else{
+        marker.setMap(null);
     };
+    savedIds = [];
+    savedIds.length = 0;
 }
 
 function HandleNoGeolocation(errorFlag) {
@@ -291,7 +318,7 @@ function OpenInfoWindow(place, marker) {
         
 
         $('#savePlace').click(function(){
-            $(function() {
+            
                 infowindow.close();
                 var categoryList = CreateCategoryList();
                 var modalText = $('<form id="dialog" title="'+place.name+'">' +
@@ -304,7 +331,6 @@ function OpenInfoWindow(place, marker) {
 
                 modalText.submit(function(){
                     var listOfCheckedBoxes = $('input[name="category"]:checked');
-                    console.log(listOfCheckedBoxes)
                     var myNotes = document.getElementById("myNotes").value;
                     var arrayForPlace = [];
                     for(var i = 0; i < listOfCheckedBoxes.length; i++){
@@ -313,8 +339,6 @@ function OpenInfoWindow(place, marker) {
 
                     place.category = arrayForPlace;
                     place.notes = myNotes;
-                    console.log(arrayForPlace);
-                    console.log(place);
                     arrayForPlace = [];
                     listOfCheckedBoxes = null;
                     myNotes = null;
@@ -322,12 +346,30 @@ function OpenInfoWindow(place, marker) {
                     modalText.dialog('destroy').remove();
                     return false;
                 });
-            });
+            
             
             SavePlace(place);
             
         });
     }
+}
+
+function SavePlace(place){
+    //Save searched place to database, along with personal notes and detailed category
+    //also add to savedMarkersArray as well as flip any bools needed
+    DeleteMarkerByPlaceId(place);
+    place.isSaved = true;
+    place.tripId = tripId;
+
+    var newMarker = CreateMarker(place);
+    AddMarkerToSavedPlacesIfNotAlready(newMarker);
+    var idForDatabase = place.placeId;
+    var placeForDatabase = {
+                            placeId: place.place_id,
+                            notes: place.myNotes,
+                            category: place.category,
+                            tripId: place.tripId
+                            };
 }
 
 function CreateCategoryList(){
@@ -343,12 +385,9 @@ function CreateCategoryList(){
 
 function ClearMarkers() {
     for (var i = 0; i < markers.length; i++ ) {
-        //add if statement to keep markers with isSaved bool = true on the map
-
-        if(markers[i].isSaved){
-            savedPlaces.push(markers[i]);
-        }
+        if(markers[i].isSaved==false){
         markers[i].setMap(null);
+        }
     }
         markers.length = 0;
 }
@@ -390,14 +429,13 @@ function ToggleSavedMarkers() {
     }
 }
 
-function SavePlace(place){
-    //Save searched place to database, along with personal notes and detailed category
-    var idForDatabase = place.placeId
-    var placeForDatabase = {
-                            placeId: place.place_id,
-                            notes: place.myNotes,
-                            category: []
-                            };
+function DeleteMarkerByPlaceId(place){
+    for(var i = 0; i < markers.length; i++){
+        var placeId = markers[i].place.placeId;
+        if(placeId==place.place_id){
+            markers[i].setMap(null);
+        }
+    }
 }
 
 function EnableSavedMarkersToggle(){
