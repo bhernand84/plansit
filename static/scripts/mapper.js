@@ -1,5 +1,5 @@
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
-    "/static/scripts/jquery-ui/external/jquery/jquery-ui ",
+    "jquery-ui/jquery-ui",
     ], function(){
     Initialize();
 });
