@@ -2,30 +2,79 @@
 
 
 	<body>
-		<p>plansddit</p>
-		{{.Userid}}
-		{{.Email}}
-		{{range .Trips}}
-		<p>mytrip</p>
-		<pre>{{.Id}} {{.Name}} {{.Description}}</pre>
-			{{range .Places}}
-			<p>{{.Placeid}} - {{.Notes}}</p>
-			{{end}}
-		{{end}}
+		<h1>plansit</h1>
 		<div>
+			Welcome back, {{.Email}} 
+		</div>
+
+		<table>
+		<thead>
+			<tr>
+				<th>Trips</th>
+				<th>Places</th>
+			</tr>
+		</thead>
+		<tbody>
+			<legend>Trips</legend>
+
+		{{range .Trips}}
+		<tr>
+			<td>{{.Name}} - {{.Description}}</td>
+			<td>
+				<ul>
+				{{range .Places}}
+				<li>{{.Placeid}} - {{.Notes}}</li>
+				{{end}}
+				</ul>
+				<a href="/mapper?tripid={{.Id}}">Add a place!</a>
+			</td>
+		</tr>
+		{{end}}
+	</tbody>
+</table>
+		<div>
+			<h1>add a trip!</h1>
 			<form action="trip/add" method="Post">
-				<input name="name" type="textbox"/>
-				<input name="description" type="textbox"/>
-				<input name="departure" type="textbox"/>
-				<input name="length" type="textbox"/>
+				<div>
+					<label for="name">name</label>
+					<input name="name" type="textbox"/>
+				</div>
+				<div>
+					<label for="name">description</label>
+					<input name="description" type="textbox"/>
+				</div>
+				<d	iv>
+					<label name=departure>departure</label>
+					<input name="departure" type="textbox"/>
+				</div>
+				<div>
+					<label for="name">how long</label>
+					<input name="length" type="textbox"/>
+				</div>
 				<input type="submit" value="add trip"/>
 			</form>
+		<div>
+			<h1>add a place</h1>
 			<form action="/place/add" method="Post">
-				<input name="tripid" type="textbox"/>
-				<input name="placeid" type="textbox"/>
-				<input name="notes" type="textbox"/>
+				<div>
+					<label for="tripid">Trip</label>
+					<select name="tripid">
+						{{range .Trips}}
+						<option name="{{.Name}}" value="{{.Id}}">{{.Name}}</option>
+						{{end}}
+					</select>
+				</div>
+				<div>
+					<label for="placeid">PlaceId</label>
+					<input name="placeid" type="textbox"/>
+				</div>
+				<div>
+					<label for="notes">Notes</label>
+					<input name="notes" type="textbox"/>
+				</div>
 				<input type="submit" value="add place"/>
 			</form>	
+		</div>
 	<script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
 	</body>
 </html>
