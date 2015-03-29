@@ -5,6 +5,7 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
     ], function(maps, ui, plansitDB){
     Initialize();
     plansitDb = plansitDB;
+    plansitDb.GetUserData();
 });
 var map;
 var mapOptions;
