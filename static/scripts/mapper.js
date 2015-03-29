@@ -85,7 +85,7 @@ function LoadSavedPlaces(myPlacesArray){
     var isSavedBool = true;
     if(myPlacesArray.length != 0){
         var bounds = new google.maps.LatLngBounds();
-        EnableSavedMarkersToggle();
+        CheckAndEnableSavedMarkersToggle();
         for(var i = 0, savedPlace; savedPlace = myPlacesArray[i]; i++){
             //get details from each place based of the placeId given.
             var service = new google.maps.places.PlacesService(map);
@@ -360,6 +360,7 @@ function OpenInfoWindow(place, marker) {
 
 function SavePlace(place){
     console.log(place);
+    CheckAndEnableSavedMarkersToggle();
     myTripId = CurrentUser.trips[0].tripid;
 
     DeleteMarkerByPlaceId(place);
@@ -447,8 +448,10 @@ function DeleteMarkerByPlaceId(place){
     }
 }
 
-function EnableSavedMarkersToggle(){
+function CheckAndEnableSavedMarkersToggle(){
+    if(mySavedMarkers.length >0){
     document.getElementById("toggleSavedMarkers").disabled = false;
+    };
 }
 
 
