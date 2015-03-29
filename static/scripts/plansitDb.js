@@ -1,5 +1,10 @@
 
+var CurrentUser;
+
 var plansItDB = {
+	LoadUserObject: function(userDBData){
+		CurrentUser = userDBData;
+	},
 	AddPlace: function(tripid, placeid, notes,categories){
 		$.ajax({
 			type: "Post",
@@ -14,36 +19,35 @@ var plansItDB = {
 		  	}
 		});
 	},
-	AddTrip: function(name, description, departure, length){
+	AddTrip: function(tripName, description, departure, tripLength){
 		$.ajax({
-			type:"Post",
 			data:{
-				name: name,
-				description: description,
-				departure: departure,
-				length: length
+				"name": tripName,
+				"description": description,
+				"departure": departure,
+				"length": tripLength
 			},
 			url: "/trip/add",
-			succes: function(data){
+			success: function(data){
 			}
 		});
 	},
 	GetTrip: function(tripid){
 		$.ajax({
-			data:{tripid: tripid},
+			data:{"tripid": tripid},
 			url: "/trip/get",
 			success:function(data){
-
 			}
-		})
+		});
 	},
 	GetUserData: function(){
 		$.ajax({
 			url:"/user/get",
 			success: function(data){
-				console.log(data)
+				plansItDB.LoadUserObject(data);
 			}
-		})
+		});
 	}
 }
+
 
