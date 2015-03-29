@@ -1,9 +1,11 @@
+var plansitDb;
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
-    ], function(){
+    "plansitDb",
+    ], function(maps, ui, plansitDB){
     Initialize();
+    plansitDb = plansitDB;
 });
-
 var map;
 var mapOptions;
 var browserSupportFlag;
@@ -13,6 +15,7 @@ var mySavedMarkers = [];
 var toggleSavedPlaces = false;
 var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
 var myTripId;
+
 
 var testPlaceArray =
                     [{id: 1,
@@ -374,7 +377,7 @@ function SavePlace(place){
     console.log(newNotes);
     console.log(newCategory);
                             
-    plansItDB.AddPlace(newTripId, newPlaceId, newNotes, newCategory);
+    plansitDb.AddPlace(newTripId, newPlaceId, newNotes, newCategory);
     console.log("place saved");
 }
 
