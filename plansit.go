@@ -8,6 +8,7 @@ import(
 	"appengine"
 _	"time"
 	"strconv"
+	"encoding/json"
 )
 
 var (
@@ -21,6 +22,8 @@ func init(){
 	http.HandleFunc("/place/add", addPlace)
 	http.HandleFunc("/trip/add", addTrip)
 	http.HandleFunc("/trip/remove", removeTrip)
+	http.HandleFunc("/trip/get", getTrip)
+	http.HandleFunc("/user/get", getUser)
     http.HandleFunc("/static/", func(w http.ResponseWriter, r *http.Request) {
         http.ServeFile(w, r, r.URL.Path[1:])
     })
@@ -38,6 +41,7 @@ func mapper( w http.ResponseWriter, r *http.Request){
 	checkAuth(w,r)
 	mapperTemplate.Execute(w, "")
 }
+
 func addPlace(w http.ResponseWriter, r * http.Request){
  	placeid, notes, tripid := r.FormValue("placeid"), r.FormValue("notes") ,
  	r.FormValue("tripid")
@@ -46,6 +50,19 @@ func addPlace(w http.ResponseWriter, r * http.Request){
 	 	models.Init(appengine.NewContext(r))
 	 	models.AddPlace(intTripId, placeid,notes)	
 	}
+}	
+func getTrip(w http.ResponseWriter, r *http.Request){
+	tripid, err := strconv.Atoi(r.FormValue("tripid"))
+	if err == nil {
+		models.Init(appengine.NewContext(r))
+		trip := models.GetTrip(tripid)
+		json.NewEncoder(w).Encode(trip)
+	}
+}
+func getUser(w http.ResponseWriter, r *http.Request){
+		models.Init(appengine.NewContext(r))
+		user := models.CurrentUser
+		json.NewEncoder(w).Encode(user)
 }
 func addTrip(w http.ResponseWriter, r * http.Request){
  	name, description, departure, length := r.FormValue("name"), r.FormValue("description") ,

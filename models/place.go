@@ -28,8 +28,9 @@ func create(userid string, name string, email string) *PlansitUser{
 func GetUser(userid string){
 	load(userid)
 }
+
 func AddTrip(name string, desc string, departure string, length string){
-	id := 1
+	id := len(CurrentUser.Trips) +1;
 	myTrip := Trip{id, name, time.Now(), desc, departure, length, nil}
 	CurrentUser.Trips = append(CurrentUser.Trips, myTrip)
 	save()
@@ -61,7 +62,8 @@ func getIndexOfTrip(id int) int{
 func AddPlace(tripid int, placeId string, notes string){
 	trip := GetTrip(tripid)
 	if trip !=nil{
-		place := Place{placeId,notes, CurrentUser.Userid}
+		id := len(trip.Places) +1
+		place := Place{id, placeId,notes}
 		trip.Places = append(trip.Places, place)
 		save()
 	}
@@ -69,7 +71,12 @@ func AddPlace(tripid int, placeId string, notes string){
 func GetPlaces(tripID int) []Place {
 	return GetTrip(tripID).Places
 }
-func RemovePlace(placeId string, tripName string){
+func RemovePlace(placeId string, tripId int){
+	trip := GetTrip(tripId)
+	if trip != nil {
+
+	}
+
 }
 func load (userid string) { 
 	var user DBCommit		
@@ -90,8 +97,11 @@ func load (userid string) {
 			if err == nil && error == nil {
 			plansitTrip:= Trip{tripid, trip.GetName(),tripcreated, trip.GetDescription(), trip.GetDeparture(), trip.GetLength(), nil}
 			for _, place := range trip.Places{
-				plansitPlace := Place{place.GetPlaceId(), place.GetNotes(), CurrentUser.Userid}
-				plansitTrip.Places = append(plansitTrip.Places, plansitPlace)
+				id,error := strconv.Atoi(place.GetId())
+				if error == nil {
+					plansitPlace := Place{id, place.GetPlaceId(), place.GetNotes()}
+					plansitTrip.Places = append(plansitTrip.Places, plansitPlace)
+				}	
 			}
 			CurrentUser.Trips = append(CurrentUser.Trips, plansitTrip)
 			}
@@ -116,6 +126,7 @@ func save(){
 
 		for _, place := range trip.Places{
 			protoPlace := new(PlansItProto_Place)
+			protoPlace.Id = proto.String(strconv.Itoa(place.Id))
 			protoPlace.PlaceId = proto.String(place.Placeid)
 			protoPlace.Notes = proto.String(place.Notes)
 			protoTrip.Places = append(protoTrip.Places, protoPlace)

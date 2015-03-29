@@ -4,25 +4,25 @@ import(
 	"time"
 )
 type PlansitUser struct {
-	Userid string
-	Name string 	`json:"name"`
+	Userid string `json:-`
+	Name string 	`json:"name"`	
 	Email string 	`json:"email"`
 	Trips []Trip 	`json:"trips"`
 }
 
 type Trip struct{
-	Id int
-	Name string
-	DateCreated time.Time
-	Description string
-	Departure string
-	Length	string
-	Places []Place
+	Id int 	`json:"tripid"`
+	Name string	   `json:"name"`
+	DateCreated time.Time 	`json:"dateCreated"`
+	Description string   	`json:"description"`
+	Departure string 	`json:"departure"`
+	Length	string 	     `json:"tripLength"`
+	Places []Place       `json:"places"`
 }
 type Place struct{
-	Placeid string
-	Notes string
-	UserID string
+	Id int  			`json:"id"`
+	Placeid string  	`json:"placeid"`
+	Notes string 		`json:"notes"`
 }
 type DBCommit struct{
 	UserID string
