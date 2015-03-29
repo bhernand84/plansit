@@ -1,3 +1,4 @@
+plansItDB.GetUserData();
 var map;
 var mapOptions;
 var browserSupportFlag;
@@ -5,8 +6,7 @@ var infowindow;
 var markers = [];
 var mySavedMarkers = [];
 var toggleSavedPlaces = false;
-var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing"];
-var tripId = 1;
+var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
 
 var testPlaceArray =
                     [{id: 1,
@@ -359,8 +359,8 @@ function SavePlace(place){
     //also add to savedMarkersArray as well as flip any bools needed
     DeleteMarkerByPlaceId(place);
     place.isSaved = true;
-    place.tripId = tripId;
-
+    place.tripId = CurrentUser.trips.tripId;
+    console.log(place);
     var newMarker = CreateMarker(place);
     AddMarkerToSavedPlacesIfNotAlready(newMarker);
     var idForDatabase = place.placeId;
