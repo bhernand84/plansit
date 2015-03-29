@@ -1,4 +1,9 @@
-plansItDB.GetUserData();
+require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
+    "/static/scripts/jquery-ui/external/jquery/jquery-ui ",
+    ], function(){
+    Initialize();
+});
+
 var map;
 var mapOptions;
 var browserSupportFlag;
@@ -205,15 +210,6 @@ function HandleNoGeolocation(errorFlag) {
             mapOptions);
     }
     map.setCenter();
-}
-
-function LoadScript() {
-    var script = document.createElement('script');
-    script.type = 'text/javascript';
-    script.src = 'https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places&callback=Initialize';
-
-    document.body.appendChild(script);
-    console.log('scripts loaded');
 }
 
 function AttemptGeolocation() {
@@ -455,5 +451,3 @@ function CheckAndEnableSavedMarkersToggle(){
 }
 
 
-
-window.onload = LoadScript;
