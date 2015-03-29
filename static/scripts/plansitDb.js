@@ -43,6 +43,7 @@ var plansItDB = {
 	GetUserData: function(){
 		$.ajax({
 			url:"/user/get",
+			dataType: "json",
 			success: function(data){
 				plansItDB.LoadUserObject(data);
 			}
