@@ -1,8 +1,17 @@
 var plansitDb;
+var Trips;
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
     "plansitDb",
     ], function(maps, ui, plansitDB){
+    myTripId = getRequestParameter("tripid");
+    $.ajax({
+        url: "/trip/get",
+        data: {tripid: myTripId},
+        success: function(data){
+            Trips = data;
+        }
+    });
     Initialize();
     plansitDb = plansitDB;
     plansitDb.GetUserData();
@@ -15,28 +24,7 @@ var markers = [];
 var mySavedMarkers = [];
 var toggleSavedPlaces = false;
 var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
-var myTripId;
 
-
-var testPlaceArray =
-                    [{id: 1,
-                    tripId: 1,
-                    placeId: "ChIJK91CahTGxokRYexHytuYDbk",
-                    notes: "Great local bar",
-                    category:["Bar", "Dinner", "Happy Hour"]
-                    },
-                    {id: 2,
-                    tripId: 1,
-                    placeId: "ChIJQ4HNIkDGxokRYxgH87uN53w",
-                    notes: "Good Beer! Food is alright",
-                    category:["Bar", "Happy Hour"]
-                    },
-                    {id: 3,
-                    tripId: 1,
-                    placeId: "ChIJ6bNuLSnGxokR29Oj-g9Tojo",
-                    notes: "Good reward points.  Nice view",
-                    category:["Hotel"]
-                    }];
 
 function Initialize() {
     mapOptions = {
@@ -62,7 +50,7 @@ function Initialize() {
 }
 
 function AddMapListeners(input, searchBox, types){
-    document.getElementById("toggleSavedMarkers").disabled = true;
+    toggleSavedPlaces = true;
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
@@ -450,8 +438,18 @@ function DeleteMarkerByPlaceId(place){
 
 function CheckAndEnableSavedMarkersToggle(){
     if(mySavedMarkers.length >0){
-    document.getElementById("toggleSavedMarkers").disabled = false;
+     toggleSavedPlaces = false;
     };
 }
-
+function checkRefParam() {
+        var paramValue = getRequestParameter('ref');
+        if (paramValue) {
+            writeCookie('ref', paramValue);
+    }
+}
+function getRequestParameter(name) {
+    name = name.toLowerCase();
+    if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search.toLowerCase()))
+        return decodeURIComponent(name[1]);
+}
 
