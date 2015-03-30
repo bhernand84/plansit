@@ -59,11 +59,11 @@ func getIndexOfTrip(id int) int{
 	return -1
 }
 
-func AddPlace(tripid int, placeId string, notes string){
+func AddPlace(tripid int, placeId string, notes string, categories []string){
 	trip := GetTrip(tripid)
 	if trip !=nil{
 		id := len(trip.Places) +1
-		place := Place{id, placeId,notes}
+		place := Place{id, placeId,notes, categories}
 		trip.Places = append(trip.Places, place)
 		save()
 	}
@@ -99,7 +99,7 @@ func load (userid string) {
 			for _, place := range trip.Places{
 				id,error := strconv.Atoi(place.GetId())
 				if error == nil {
-					plansitPlace := Place{id, place.GetPlaceId(), place.GetNotes()}
+					plansitPlace := Place{id, place.GetPlaceId(), place.GetNotes(), place.GetCategories()}
 					plansitTrip.Places = append(plansitTrip.Places, plansitPlace)
 				}	
 			}
@@ -129,6 +129,7 @@ func save(){
 			protoPlace.Id = proto.String(strconv.Itoa(place.Id))
 			protoPlace.PlaceId = proto.String(place.Placeid)
 			protoPlace.Notes = proto.String(place.Notes)
+			protoPlace.Categories = place.Categories
 			protoTrip.Places = append(protoTrip.Places, protoPlace)
 		}
 		protoUser.Trips = append(protoUser.Trips, protoTrip)

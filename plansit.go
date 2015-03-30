@@ -45,10 +45,12 @@ func mapper( w http.ResponseWriter, r *http.Request){
 func addPlace(w http.ResponseWriter, r * http.Request){
  	placeid, notes, tripid := r.FormValue("placeid"), r.FormValue("notes") ,
  	r.FormValue("tripid")
+ 	r.ParseForm()
+ 	categories := r.Form["categories"]
  	intTripId, error := strconv.Atoi(tripid)
  	if error == nil{
 	 	models.Init(appengine.NewContext(r))
-	 	models.AddPlace(intTripId, placeid,notes)	
+	 	models.AddPlace(intTripId, placeid,notes, categories)	
 	}
 }	
 func getTrip(w http.ResponseWriter, r *http.Request){

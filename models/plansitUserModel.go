@@ -23,6 +23,7 @@ type Place struct{
 	Id int  			`json:"id"`
 	Placeid string  	`json:"placeid"`
 	Notes string 		`json:"notes"`
+	Categories [] string `json:"categories"`
 }
 type DBCommit struct{
 	UserID string

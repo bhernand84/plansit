@@ -23,7 +23,7 @@
 			<td>
 				<ul>
 				{{range .Places}}
-				<li>{{.Placeid}} - {{.Notes}}</li>
+				<li>{{.Placeid}} - {{.Notes}} - {{.Categories}}</li>
 				{{end}}
 				</ul>
 				<a href="/mapper?tripid={{.Id}}">Add a place!</a>
@@ -72,6 +72,12 @@
 					<label for="notes">Notes</label>
 					<input name="notes" type="textbox"/>
 				</div>
+				<div>
+					<label for="categories">Categories</label>
+					<input name="categories" type="checkbox" value="dog park"/>dog park
+					<input name="categories" type="checkbox" value="nail salon"/>nail salon
+					<input name="categories" type="checkbox" value="club"/>club
+					<input name="categories" type="checkbox" value="diner"/>diner
 				<input type="submit" value="add place"/>
 			</form>	
 		</div>

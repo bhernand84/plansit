@@ -1,3 +1,4 @@
+
 package models;
 
 message PlansItProto{
@@ -21,12 +22,7 @@ message Place {
 	required string Id = 1;
 	optional string PlaceId = 2;
 	optional string Notes = 3; 
-	repeated Category Categories = 4;
-}
-
-message Category{
-	optional string Name = 1; 
-	optional string Description = 2;
+	repeated string Categories = 4;
 }
 
 }

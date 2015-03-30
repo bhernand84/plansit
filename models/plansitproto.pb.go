@@ -125,11 +125,11 @@ func (m *PlansItProto_Trip) GetPlaces() []*PlansItProto_Place {
 }
 
 type PlansItProto_Place struct {
-	Id               *string                  `protobuf:"bytes,1,req" json:"Id,omitempty"`
-	PlaceId          *string                  `protobuf:"bytes,2,opt" json:"PlaceId,omitempty"`
-	Notes            *string                  `protobuf:"bytes,3,opt" json:"Notes,omitempty"`
-	Categories       []*PlansItProto_Category `protobuf:"bytes,4,rep" json:"Categories,omitempty"`
-	XXX_unrecognized []byte                   `json:"-"`
+	Id               *string  `protobuf:"bytes,1,req" json:"Id,omitempty"`
+	PlaceId          *string  `protobuf:"bytes,2,opt" json:"PlaceId,omitempty"`
+	Notes            *string  `protobuf:"bytes,3,opt" json:"Notes,omitempty"`
+	Categories       []string `protobuf:"bytes,4,rep" json:"Categories,omitempty"`
+	XXX_unrecognized []byte   `json:"-"`
 }
 
 func (m *PlansItProto_Place) Reset()         { *m = PlansItProto_Place{} }
@@ -157,35 +157,11 @@ func (m *PlansItProto_Place) GetNotes() string {
 	return ""
 }
 
-func (m *PlansItProto_Place) GetCategories() []*PlansItProto_Category {
+func (m *PlansItProto_Place) GetCategories() []string {
 	if m != nil {
 		return m.Categories
 	}
 	return nil
-}
-
-type PlansItProto_Category struct {
-	Name             *string `protobuf:"bytes,1,opt" json:"Name,omitempty"`
-	Description      *string `protobuf:"bytes,2,opt" json:"Description,omitempty"`
-	XXX_unrecognized []byte  `json:"-"`
-}
-
-func (m *PlansItProto_Category) Reset()         { *m = PlansItProto_Category{} }
-func (m *PlansItProto_Category) String() string { return proto.CompactTextString(m) }
-func (*PlansItProto_Category) ProtoMessage()    {}
-
-func (m *PlansItProto_Category) GetName() string {
-	if m != nil && m.Name != nil {
-		return *m.Name
-	}
-	return ""
-}
-
-func (m *PlansItProto_Category) GetDescription() string {
-	if m != nil && m.Description != nil {
-		return *m.Description
-	}
-	return ""
 }
 
 func init() {
