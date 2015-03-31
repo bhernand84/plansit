@@ -54,13 +54,17 @@ define(["jquery"], function($){
 				}
 			});
 		},
-		GetTrip: function(tripid){
+		GetTrip: function(tripid, callback){
+			var Trip;
 			$.ajax({
 				data:{"tripid": tripid},
 				url: "/trip/get",
+				dataType:"json",
 				success:function(data){
+					callback(data);
 				}
 			});
+			return Trip;
 		},
 		GetUserData: function(){
 			$.ajax({

@@ -1,24 +1,15 @@
 var plansitDb;
 var mySavedMarkers = [];
+var mySavedPlaces= [];
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
     "plansitDb",
     ], function(maps, ui, plansitDB){
-    myTripId = getRequestParameter("tripid");
-    $.ajax({
-        url: "/trip/get",
-        data: {tripid: myTripId},
-        dataType:"json",
-        success: function(data){
-            var Trips = data;
-            if(data){
-                mySavedMarkers = data.places;
-                $("#tripHeader").html(data.name);
-            };
-        }
-    });
     Initialize();
     plansitDb = plansitDB;
+    myTripId = getRequestParameter("tripid");
+
+    var Trips = plansitDb.GetTrip(myTripId, LoadTrip);    
     plansitDb.GetUserData();
 });
 var map;
@@ -26,12 +17,26 @@ var mapOptions;
 var browserSupportFlag;
 var infowindow;
 var markers = [];
-var toggleSavedPlaces = false;
+var toggleSavedPlaces = true;
 var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
+
+function LoadTrip(trips){
+if(trips){
+    if(trips.places){
+        mySavedPlaces = trips.places;
+    }
+    $("#tripHeader").html(trips.name);
+    LoadSavedPlaces();
+    }
+}
 
 function GetMarkersFromSaved(places){
     $.each(places, function(place){
-        mySavedMarkers.push({placeid: place.placeId, notes: place.notes, categories: place.categories});
+        mySavedMarkers.push({
+            placeid: place.placeId, 
+            notes: place.notes, 
+            categories: place.categories
+        });
     });
 }
 function Initialize() {
@@ -43,7 +48,6 @@ function Initialize() {
     map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
 
-    AttemptGeolocation();
 
     var input = (document.getElementById('pac-input'));
     var searchBox = new google.maps.places.SearchBox((input));
@@ -86,44 +90,36 @@ function AddMapListeners(input, searchBox, types){
     });
 }
 
-function LoadSavedPlaces(myPlacesArray){
-    var isSavedBool = true;
-    if(myPlacesArray.length != 0){
+function LoadSavedPlaces(){
+    if(mySavedPlaces.length != 0){
         var bounds = new google.maps.LatLngBounds();
-        CheckAndEnableSavedMarkersToggle();
-        for(var i = 0, savedPlace; savedPlace = myPlacesArray[i]; i++){
-            //get details from each place based of the placeId given.
+        for(var i = 0, savedPlace; savedPlace = mySavedPlaces[i]; i++){
             var service = new google.maps.places.PlacesService(map);
             request = {
-                placeId: savedPlace.placeId
+                placeId: savedPlace.placeid
             };
             service.getDetails(request, function (place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
-                    var newMarker = CreateMarker(place, isSavedBool);
+                    var newMarker = CreateMarker(place, true);
                     bounds.extend(place.geometry.location);
-                    AddMarkerToSavedPlaces(marker);
                     map.fitBounds(bounds);
-                    console.log(newMarker);
                 }
             });            
         }
         map.setCenter(bounds.getCenter());
+        ToggleSavedMarkers();
     }  
 }
 
 function IsAlreadySaved(place){
-  if(mySavedMarkers == null)
-    return false;
-
    if(mySavedMarkers.length==0){
         return false;
     }
     else {
         var savedPlaceIDs = [];
         for(var i = 0; i < mySavedMarkers.length; i++){
-            savedPlaceIDs.push(mySavedMarkers[i].placeId);
+            savedPlaceIDs.push(mySavedMarkers[i].place.placeId);
         }
-
         if(savedPlaceIDs.indexOf(place.place_id)!= -1){
             return true;
         }
@@ -143,6 +139,10 @@ function CreateMarker(placeResult, isSavedBool) {
             scaledSize: new google.maps.Size(25, 25)
         };
     
+
+    if(isSavedBool == false){
+        isSavedBool = IsAlreadySaved(placeResult);
+    }
     var marker = new google.maps.Marker({
         map: map,
         icon: image,
@@ -151,22 +151,14 @@ function CreateMarker(placeResult, isSavedBool) {
             placeId: placeResult.place_id,
             location: placeLoc
         },
-        isSaved: IsAlreadySaved(placeResult)
+        isSaved: isSavedBool
     });
-
-    if(isSavedBool!=null){
-        marker.isSaved = true;
-    };
 
     if(marker.isSaved==true){
         AddMarkerToSavedPlaces(marker);
-        marker.setMap(null);
-    }
-
-    if(marker.isSaved==false){
+    } else {
         markers.push(marker);
     }
-
 
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
@@ -175,7 +167,7 @@ function CreateMarker(placeResult, isSavedBool) {
 }
 
 function AddMarkerToSavedPlaces(placeMarker){
-            mySavedMarkers.push(placeMarker);
+    mySavedMarkers.push(placeMarker);
 }
 
 function HandleNoGeolocation(errorFlag) {
@@ -266,7 +258,7 @@ function OpenInfoWindow(place, marker) {
             infowindow.close();
         }
     });
-    var isSaved = (place.isSaved == null) ? null : place.isSaved;
+    var isSaved = place.isSaved;
     var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
@@ -293,9 +285,6 @@ function OpenInfoWindow(place, marker) {
     }
     if (!isSaved) {
         $('#bodyContent').append('<button id="savePlace">Save To My Map</button>');
-
-        
-
         $('#savePlace').click(function(){
             
                 infowindow.close();
@@ -376,7 +365,6 @@ function Callback(results, status) {
 }
 
 function ToggleSavedMarkers() {
-    //false = hide     true = show
     if (toggleSavedPlaces == false) {
         HideSavedMarkers();
         toggleSavedPlaces = true;
@@ -409,11 +397,6 @@ function DeleteMarkerByPlaceId(place){
     }
 }
 
-function CheckAndEnableSavedMarkersToggle(){
-    if(mySavedMarkers.length >0){
-     toggleSavedPlaces = false;
-    };
-}
 function checkRefParam() {
         var paramValue = getRequestParameter('ref');
         if (paramValue) {
