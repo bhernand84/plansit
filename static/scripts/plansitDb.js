@@ -18,12 +18,12 @@ define(["jquery"], function($){
 			  	}
 			});
 		},
-		DeletePlace: function(tripid, placeid){
+		RemovePlace: function(tripid, ID){
 			$.ajax({
 				type:"Post",
 				data:{ 
 					tripid: tripid,
-					placeid: placeid
+					placeid: ID
 				},
 				url: "/place/remove",
 				success: function(data){

@@ -20,6 +20,7 @@ func init(){
 	http.HandleFunc("/",root)
 	http.HandleFunc("/mapper", mapper)
 	http.HandleFunc("/place/add", addPlace)
+	http.HandleFunc("/place/remove", removePlace)
 	http.HandleFunc("/trip/add", addTrip)
 	http.HandleFunc("/trip/remove", removeTrip)
 	http.HandleFunc("/trip/get", getTrip)
@@ -53,6 +54,15 @@ func addPlace(w http.ResponseWriter, r * http.Request){
 	 	models.AddPlace(intTripId, placeid,notes, categoriesArr)	
 	}
 }	
+func removePlace(w http.ResponseWriter, r * http.Request){
+	tripid, err := strconv.Atoi(r.FormValue("tripid"))
+	placeid, error := strconv.Atoi(r.FormValue("placeid"))
+	if err == nil && error == nil{
+		models.Init(appengine.NewContext(r))
+		models.RemovePlace(tripid, placeid)
+	}
+
+}
 func getTrip(w http.ResponseWriter, r *http.Request){
 	tripid, err := strconv.Atoi(r.FormValue("tripid"))
 	if err == nil {

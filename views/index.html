@@ -22,9 +22,12 @@
 		<tr>
 			<td>{{.Name}} - {{.Description}}</td>
 			<td>
-				<ul>
+				<ul data-tripid="{{.Id}}">
 				{{range .Places}}
-				<li>{{.Placeid}} - {{.Notes}} - {{.Categories}}</li>
+				<li>
+					{{.Id}} {{.Placeid}} - {{.Notes}} - {{.Categories}}
+					<a class="removePlace" data-id="{{.Id}}" href="">X </a>
+				</li>
 				{{end}}
 				</ul>
 				<a href="/mapper?tripid={{.Id}}">Add a place!</a>

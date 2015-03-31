@@ -26,6 +26,14 @@ require(["jquery", "plansitDb"], function($, plansitDb){
         plansitDb.AddTrip(name, description, departure, triplength);
         ReloadTrips();
 	});
+	$(".removePlace").click(function(e){
+		e.preventDefault();
+		var id = $(this).attr("data-id");
+		var tripid = $(this).parent().parent().attr("data-tripid");
+		plansitDb.RemovePlace(tripid, id);
+		ReloadPlacesForTrip(tripid);
+
+	})
 });
 
 function ReloadPlacesForTrip(tripid){
