@@ -44,6 +44,16 @@ define(["jquery"], function($){
 				}
 			});
 		},
+		RemoveTrip: function(tripid){
+			$.ajax({
+				data:{
+					"tripid": tripid
+				},
+				url: "trip/remove",
+				success: function(data){
+				}
+			});
+		},
 		GetTrip: function(tripid){
 			$.ajax({
 				data:{"tripid": tripid},

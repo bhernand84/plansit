@@ -28,12 +28,21 @@ require(["jquery", "plansitDb"], function($, plansitDb){
 	});
 	$(".removePlace").click(function(e){
 		e.preventDefault();
-		var id = $(this).attr("data-id");
-		var tripid = $(this).parent().parent().attr("data-tripid");
-		plansitDb.RemovePlace(tripid, id);
-		ReloadPlacesForTrip(tripid);
-
-	})
+		if(confirm("You sure girl?")){
+			var id = $(this).attr("data-id");
+			var tripid = $(this).parent().parent().attr("data-tripid");
+			plansitDb.RemovePlace(tripid, id);
+			ReloadPlacesForTrip(tripid);
+		}
+	});
+	$(".removeTrip").click(function(e){
+		e.preventDefault();
+		if(confirm("You sure girl?")){
+			var tripid = $(this).attr("data-id");
+			plansitDb.RemoveTrip(tripid);
+			ReloadTrips();
+		}
+	});
 });
 
 function ReloadPlacesForTrip(tripid){

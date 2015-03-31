@@ -20,7 +20,9 @@
 
 		{{range .Trips}}
 		<tr>
-			<td>{{.Name}} - {{.Description}}</td>
+			<td>{{.Name}} - {{.Description}} 
+				<a class="removeTrip" data-id="{{.Id}}" href="">X</a>
+			</td>
 			<td>
 				<ul data-tripid="{{.Id}}">
 				{{range .Places}}
