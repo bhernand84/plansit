@@ -1,5 +1,5 @@
 
-require(["jquery", "plansitDb"], function($, plansitDb){
+require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitDb){
 	plansitDb.GetUserData();
 	$("#placeAdd").submit(function(event){
 		event.preventDefault();
@@ -42,6 +42,13 @@ require(["jquery", "plansitDb"], function($, plansitDb){
 			plansitDb.RemoveTrip(tripid);
 			ReloadTrips();
 		}
+	});
+	$(".modalOpen").click(function(e){
+		e.preventDefault();
+		console.log('clicked');
+		var dataid = $(this).attr("data-modalid");
+		var modal = $(".modal[data-id='" + dataid + "']");
+		modal.dialog();
 	});
 });
 
