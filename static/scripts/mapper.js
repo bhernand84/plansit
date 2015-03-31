@@ -1,4 +1,5 @@
 var plansitDb;
+var placesFromDb = [];
 var mySavedMarkers = [];
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
@@ -12,7 +13,7 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
         success: function(data){
             var Trips = data;
             if(data){
-                mySavedMarkers = data.places;
+                placesFromDb = data.places;
                 $("#tripHeader").html(data.name);
             };
         }
@@ -43,7 +44,7 @@ function Initialize() {
     map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
 
-    AttemptGeolocation();
+    //AttemptGeolocation();
 
     var input = (document.getElementById('pac-input'));
     var searchBox = new google.maps.places.SearchBox((input));
@@ -55,6 +56,8 @@ function Initialize() {
 
     setTimeout(AddMapListeners(input, searchBox), 1);  
     map.setZoom(15);
+
+    setTimeout(LoadSavedPlaces(placesFromDb), 5000);
 }
 
 function AddMapListeners(input, searchBox, types){
@@ -95,7 +98,7 @@ function LoadSavedPlaces(myPlacesArray){
             //get details from each place based of the placeId given.
             var service = new google.maps.places.PlacesService(map);
             request = {
-                placeId: savedPlace.placeId
+                placeId: savedPlace.placeid
             };
             service.getDetails(request, function (place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
