@@ -1,3 +1,4 @@
+
 package models
 
 import(
@@ -71,12 +72,26 @@ func AddPlace(tripid int, placeId string, notes string, categories []string){
 func GetPlaces(tripID int) []Place {
 	return GetTrip(tripID).Places
 }
-func RemovePlace(placeId string, tripId int){
+
+func RemovePlace(tripId int, placeid int){
 	trip := GetTrip(tripId)
 	if trip != nil {
-
+		placeIndex := getIndexOfPlace(placeid, trip)
+		if placeIndex == -1 {
+			return
+		}
+		trip.Places = append(trip.Places[:placeIndex], trip.Places[placeIndex +1:]...)
+		save()
 	}
 
+}
+func getIndexOfPlace(id int, trip *Trip) int{
+	for index, place := range trip.Places{
+		if place.Id == id {
+			return index
+		}
+	}
+	return -1
 }
 func load (userid string) { 
 	var user DBCommit		
