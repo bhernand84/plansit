@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Asynchronous Loading</title>
+    <title>plansit</title>
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
@@ -58,10 +58,8 @@
     <script data-main="/static/scripts/map" src="/static/scripts/require.js"></script>
 </head>
 <body>
-        <h1>plansit</h1>
-        <div>
-            <h3><a href="/">back</a></h3>
-        </div>
+        <h1><a href="/">plansit</a></h1>
+        <h2 id="tripHeader"></h2>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
     <input id="toggleSavedMarkers" onclick="ToggleSavedMarkers()" type=button value="Toggle Saved Markers"></input><input onclick="ClearMarkers();" type=button value="Clear Unsaved Markers">
     <div id="map-canvas"></div>

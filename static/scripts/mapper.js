@@ -1,5 +1,5 @@
 var plansitDb;
-var Trips;
+var mySavedMarkers = [];
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
     "plansitDb",
@@ -8,8 +8,13 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
     $.ajax({
         url: "/trip/get",
         data: {tripid: myTripId},
+        dataType:"json",
         success: function(data){
-            Trips = data;
+            var Trips = data;
+            if(data){
+                mySavedMarkers = data.places;
+                $("#tripHeader").html(data.name);
+            };
         }
     });
     Initialize();
@@ -21,11 +26,14 @@ var mapOptions;
 var browserSupportFlag;
 var infowindow;
 var markers = [];
-var mySavedMarkers = [];
 var toggleSavedPlaces = false;
 var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
 
-
+function GetMarkersFromSaved(places){
+    $.each(places, function(place){
+        mySavedMarkers.push({placeid: place.placeId, notes: place.notes, categories: place.categories});
+    });
+}
 function Initialize() {
     mapOptions = {
         zoom: 14,
@@ -93,7 +101,7 @@ function LoadSavedPlaces(myPlacesArray){
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
                     var newMarker = CreateMarker(place, isSavedBool);
                     bounds.extend(place.geometry.location);
-                    AddMarkerToSavedPlacesIfNotAlready(marker);
+                    AddMarkerToSavedPlaces(marker);
                     map.fitBounds(bounds);
                     console.log(newMarker);
                 }
@@ -104,25 +112,22 @@ function LoadSavedPlaces(myPlacesArray){
 }
 
 function IsAlreadySaved(place){
-    var savedPlacesIDs = [];
-    if(mySavedMarkers.length==0){
-        place.isSaved = false;
-        console.log("Saved Places is Empty!!");
+  if(mySavedMarkers == null)
+    return false;
+
+   if(mySavedMarkers.length==0){
         return false;
     }
-    else if(mySavedMarkers.length>0){
+    else {
+        var savedPlaceIDs = [];
         for(var i = 0; i < mySavedMarkers.length; i++){
-            savedPlacesIDs.push(mySavedMarkers[i].place.placeId);
+            savedPlaceIDs.push(mySavedMarkers[i].placeId);
         }
 
-        if(savedPlacesIDs.indexOf(place.place_id)!= -1){
-            place.isSaved = true;
-            console.log("already saved");
+        if(savedPlaceIDs.indexOf(place.place_id)!= -1){
             return true;
         }
         else{
-            place.isSaved = false;
-            console.log("not already saved");
             return false;
             }
     }
@@ -151,11 +156,10 @@ function CreateMarker(placeResult, isSavedBool) {
 
     if(isSavedBool!=null){
         marker.isSaved = true;
-        marker.tripId = tripId;
     };
 
     if(marker.isSaved==true){
-        AddMarkerToSavedPlacesIfNotAlready(marker);
+        AddMarkerToSavedPlaces(marker);
         marker.setMap(null);
     }
 
@@ -170,25 +174,8 @@ function CreateMarker(placeResult, isSavedBool) {
     return marker;
 }
 
-function AddMarkerToSavedPlacesIfNotAlready(marker){
-    //check its id against all id's in the savedArray.  If its not there, add it
-    var savedIds = [];
-    for(var i = 0; i < mySavedMarkers.length; i++){
-        var singleId = mySavedMarkers[i].place.place_id;
-        savedIds.push(singleId);
-    };
-    if(!savedIds.indexOf(marker.place.place_id) > -1){
-        mySavedMarkers.push(marker);
-        savedIds = [];
-        savedIds.length = 0;
-        return marker;
-    }
-    else{
-        marker.setMap(null);
-        savedIds = [];
-        savedIds.length = 0;
-        return null;
-    };
+function AddMarkerToSavedPlaces(placeMarker){
+            mySavedMarkers.push(placeMarker);
 }
 
 function HandleNoGeolocation(errorFlag) {
@@ -206,7 +193,6 @@ function HandleNoGeolocation(errorFlag) {
 
 function AttemptGeolocation() {
     if (navigator.geolocation) {
-        console.log("geolocation is true");
         navigator.geolocation.getCurrentPosition(function (position) {
             var center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
             map.setCenter(center);
@@ -316,65 +302,52 @@ function OpenInfoWindow(place, marker) {
                 var categoryList = CreateCategoryList();
                 var modalText = $('<form id="dialog" title="'+place.name+'">' +
                                     '<div>' +
-                                        '<textarea id="myNotes" rows="3" cols="27" placeholder="Save your notes here..."></textarea>' +
+                                        '<textarea id="myNotes" rows="3" name="notes" cols="27" placeholder="Save your notes here..."></textarea>' +
                                     '</div>' +
                                     categoryList.html() + '<input type="submit" value="Submit">' +
                                 '</form>');
                 modalText.dialog();
 
-                modalText.submit(function(){
-                    var listOfCheckedBoxes = $('input[name="category"]:checked');
+                modalText.submit(function(event){
+                    event.preventDefault();
                     var myNotes = document.getElementById("myNotes").value;
-                    var arrayForPlace = [];
-                    for(var i = 0; i < listOfCheckedBoxes.length; i++){
-                        arrayForPlace.push(listOfCheckedBoxes[i].value);
-                    };
-
-                    place.category = arrayForPlace;
+                    var categories =  [];
+                    $("input[name='categories']:checked").each(function() {
+                      categories.push($(this).val());
+                    });
+                    place.categories = categories;
                     place.notes = myNotes;
                     place.isSaved = true;
-
                     arrayForPlace = [];
                     listOfCheckedBoxes = null;
                     myNotes = null;
 
                     SavePlace(place);
                     modalText.dialog('destroy').remove();
-                    return false;
                 });
         });
     }
 }
 
 function SavePlace(place){
-    console.log(place);
-    CheckAndEnableSavedMarkersToggle();
-    myTripId = CurrentUser.trips[0].tripid;
 
     DeleteMarkerByPlaceId(place);
-    place.tripId = myTripId;
-    console.log(place);
-    var newMarker = CreateMarker(place);
-    newMarker = AddMarkerToSavedPlacesIfNotAlready(newMarker);
     
-    var newTripId = place.tripId;
     var newPlaceId = place.place_id;
     var newNotes = place.notes;
-    var newCategory = place.category;
-    console.log(newTripId);
-    console.log(newPlaceId);
-    console.log(newNotes);
-    console.log(newCategory);
-                            
-    plansitDb.AddPlace(newTripId, newPlaceId, newNotes, newCategory);
-    console.log("place saved");
+    var newCategory = place.categories;
+
+    plansitDb.AddPlace(myTripId, newPlaceId, newNotes, newCategory);
+    var newMarker = CreateMarker(place);
+    newMarker = AddMarkerToSavedPlaces(newMarker);
+ 
 }
 
 function CreateCategoryList(){
     var listForHtml = $('<ul type="none" id="listOfCategories"></ul>')
     if(categories.length!=0){
         for(var i = 0; i < categories.length; i++){
-            var listItem = '<li>' + '<input type="checkbox" name="category" value="'+categories[i]+'">' + categories[i] + '</li>';
+            var listItem = '<li>' + '<input type="checkbox" name="categories" value="'+categories[i]+'">' + categories[i] + '</li>';
             listForHtml.append(listItem);
         }
         return listForHtml;

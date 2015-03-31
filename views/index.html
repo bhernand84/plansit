@@ -1,3 +1,4 @@
+
 <html>
 
 
@@ -34,28 +35,28 @@
 </table>
 		<div>
 			<h1>add a trip!</h1>
-			<form action="trip/add" method="Post">
+			<form action="trip/add" method="Post" id="tripAdd">
 				<div>
 					<label for="name">name</label>
 					<input name="name" type="textbox"/>
 				</div>
 				<div>
-					<label for="name">description</label>
+					<label for="description">description</label>
 					<input name="description" type="textbox"/>
 				</div>
 				<d	iv>
-					<label name=departure>departure</label>
+					<label name="departure">departure</label>
 					<input name="departure" type="textbox"/>
 				</div>
 				<div>
-					<label for="name">how long</label>
+					<label for="length">how long</label>
 					<input name="length" type="textbox"/>
 				</div>
 				<input type="submit" value="add trip"/>
 			</form>
 		<div>
 			<h1>add a place</h1>
-			<form action="/place/add" method="Post">
+			<form action="/place/add" id="placeAdd" method="Post">
 				<div>
 					<label for="tripid">Trip</label>
 					<select name="tripid">

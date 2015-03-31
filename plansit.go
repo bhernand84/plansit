@@ -6,9 +6,9 @@ import(
 	"html/template"
 	"models"
 	"appengine"
-_	"time"
 	"strconv"
 	"encoding/json"
+_	"log"
 )
 
 var (
@@ -46,11 +46,11 @@ func addPlace(w http.ResponseWriter, r * http.Request){
  	placeid, notes, tripid := r.FormValue("placeid"), r.FormValue("notes") ,
  	r.FormValue("tripid")
  	r.ParseForm()
- 	categories := r.Form["categories"]
+ 	categoriesArr := r.Form["categories[]"]
  	intTripId, error := strconv.Atoi(tripid)
  	if error == nil{
 	 	models.Init(appengine.NewContext(r))
-	 	models.AddPlace(intTripId, placeid,notes, categories)	
+	 	models.AddPlace(intTripId, placeid,notes, categoriesArr)	
 	}
 }	
 func getTrip(w http.ResponseWriter, r *http.Request){
