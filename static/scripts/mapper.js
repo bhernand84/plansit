@@ -98,6 +98,7 @@ function LoadSavedPlaces(){
             request = {
                 placeId: savedPlace.placeid
             };
+
             service.getDetails(request, function (place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
                     var newMarker = CreateMarker(place, true);
@@ -156,12 +157,20 @@ function CreateMarker(placeResult, isSavedBool) {
 
     if(marker.isSaved==true){
         AddMarkerToSavedPlaces(marker);
+        $("#savedPlaces").append("<div><p><a class='placeLink' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a></p>");
     } else {
         markers.push(marker);
+        $("places").append("<div><p>" + marker.title + "</p>");
     }
 
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
+    });
+    $(".placeLink").click(function(e){
+        e.preventDefault();
+        var savedPlaceId = $(this).attr("data-placeid");
+        var savedMarker = $.grep(mySavedMarkers, function(e){ return e.place.placeId == savedPlaceId; });
+        GetPlaceDetails(savedMarker[0]);
     });
     return marker;
 }
