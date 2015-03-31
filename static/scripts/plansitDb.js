@@ -18,6 +18,19 @@ define(["jquery"], function($){
 			  	}
 			});
 		},
+		DeletePlace: function(tripid, placeid){
+			$.ajax({
+				type:"Post",
+				data:{ 
+					tripid: tripid,
+					placeid: placeid
+				},
+				url: "/place/remove",
+				success: function(data){
+
+				}
+			});
+		},
 		AddTrip: function(tripName, description, departure, tripLength){
 			$.ajax({
 				data:{
