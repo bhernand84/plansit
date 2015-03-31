@@ -10,23 +10,19 @@
 		</div>
 
 		<div>
-			<h2>Trips <a class="modalOpen" data-modalid="addTrip">open</a></h2>
+			<h2 class="subHeader">Trips</h2>
+			<a class="modalOpen" data-modalid="addTrip">add a trip</a>
+
 			{{range .Trips}}
 			<div>
 				<div>
 					<h3 class="subHeader"><a href="/mapper?tripid={{.Id}}">{{.Name}}</a></h3>
-					<label>{{.Description}}</label> 
 					<a class="removeTrip" data-id="{{.Id}}" href="">X</a>
 				</div>
-				<ul data-tripid="{{.Id}}">
-				{{range .Places}}
-				<li>
-					{{.Id}} {{.Placeid}} - {{.Notes}} - {{.Categories}}
-					<a class="removePlace" data-id="{{.Id}}">X </a>
-				</li>
-				{{end}}
-				</ul>
-				<a href="/mapper?tripid={{.Id}}">Add a place!</a>
+				<div>
+					<label>{{.Description}}</label> 
+					<label>{{.Length}} in {{.Departure}}</label>
+				</div>
 			{{end}}
 		<div class="modal" data-id="addTrip">
 			<h1>add a trip!</h1>
@@ -82,7 +78,6 @@
 	<style>
 		.subHeader{
 			display:inline;
-			padding:20px;
 		}
 		.modal{
 			display:none;
