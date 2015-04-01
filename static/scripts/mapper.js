@@ -202,7 +202,7 @@ function CreateMarker(placeResult, isSavedBool) {
             });
             var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
             if(placeindex > -1){
-                delete mySavedMarkers[placeIndex];
+                delete mySavedMarkers[placeindex];
             }
             plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
         }

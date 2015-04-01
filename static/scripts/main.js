@@ -12,9 +12,16 @@ require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitD
         var placeId = $("input[name='placeid']", this).val();
         var notes = $("input[name='notes']", this).val();
 
-        plansitDb.AddPlace(tripID, placeId, notes, categories);
-
-        ReloadPlacesForTrip(tripID);
+        var response = plansitDb.AddPlace(tripID, placeId, notes, categories);
+        if(response.error){
+        	if(!$(".validation", this).length >0){
+	        	$(this).prepend("<div class='validation'></div>");
+	        	$(".validation", this).html(response.error);
+	        }
+    	}
+    	else{
+	        ReloadPlacesForTrip(tripID);
+        }
 	});
 	$("#tripAdd").submit(function(event){
 		event.preventDefault();
@@ -22,9 +29,16 @@ require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitD
         var description = $("input[name='description']", this).val();
         var departure = $("input[name='departure']", this).val();
         var triplength = $("input[name='length']", this).val();
-        console.log(name);
-        plansitDb.AddTrip(name, description, departure, triplength);
-        ReloadTrips();
+        var response = plansitDb.AddTrip(name, description, departure, triplength);
+        if(response.error){
+	    	if(!$(".validation", this).length >0){
+	        	$(this).prepend("<div class='validation'></div>");
+	        	$(".validation", this).html(response.error);
+	        }
+		}
+		else{
+	       ReloadTrips();
+		}
 	});
 	$(".removePlace").click(function(e){
 		e.preventDefault();
@@ -45,7 +59,6 @@ require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitD
 	});
 	$(".modalOpen").click(function(e){
 		e.preventDefault();
-		console.log('clicked');
 		var dataid = $(this).attr("data-modalid");
 		var modal = $(".modal[data-id='" + dataid + "']");
 		modal.dialog();
@@ -53,7 +66,7 @@ require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitD
 });
 
 function ReloadPlacesForTrip(tripid){
-	location.reload();
+	//location.reload();
 }
 function ReloadTrips(){
 	location.reload();
