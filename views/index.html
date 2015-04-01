@@ -1,42 +1,31 @@
 
+
 <html>
-
-
 	<body>
 		<h1>plansit</h1>
 		<div>
 			Welcome back, {{.Email}} 
+			<div class="left">
+				<a class="modalOpen" data-modalid="addPlace">quick add</a>
+			</div>
 		</div>
 
-		<table>
-		<thead>
-			<tr>
-				<th>Trips</th>
-				<th>Places</th>
-			</tr>
-		</thead>
-		<tbody>
-			<legend>Trips</legend>
-
-		{{range .Trips}}
-		<tr>
-			<td>{{.Name}} - {{.Description}}</td>
-			<td>
-				<ul data-tripid="{{.Id}}">
-				{{range .Places}}
-				<li>
-					{{.Id}} {{.Placeid}} - {{.Notes}} - {{.Categories}}
-					<a class="removePlace" data-id="{{.Id}}" href="">X </a>
-				</li>
-				{{end}}
-				</ul>
-				<a href="/mapper?tripid={{.Id}}">Add a place!</a>
-			</td>
-		</tr>
-		{{end}}
-	</tbody>
-</table>
 		<div>
+			<h2 class="subHeader">Trips</h2>
+			<a class="modalOpen" data-modalid="addTrip">add a trip</a>
+
+			{{range .Trips}}
+			<div>
+				<div>
+					<h3 class="subHeader"><a href="/mapper?tripid={{.Id}}">{{.Name}}</a></h3>
+					<a class="removeTrip" data-id="{{.Id}}" href="">X</a>
+				</div>
+				<div>
+					<label>{{.Description}}</label> 
+					<label>{{.Length}} in {{.Departure}}</label>
+				</div>
+			{{end}}
+		<div class="modal" data-id="addTrip">
 			<h1>add a trip!</h1>
 			<form action="trip/add" method="Post" id="tripAdd">
 				<div>
@@ -47,7 +36,7 @@
 					<label for="description">description</label>
 					<input name="description" type="textbox"/>
 				</div>
-				<d	iv>
+				<div>
 					<label name="departure">departure</label>
 					<input name="departure" type="textbox"/>
 				</div>
@@ -57,7 +46,7 @@
 				</div>
 				<input type="submit" value="add trip"/>
 			</form>
-		<div>
+		<div class="modal" data-id="addPlace">
 			<h1>add a place</h1>
 			<form action="/place/add" id="placeAdd" method="Post">
 				<div>
@@ -86,5 +75,24 @@
 			</form>	
 		</div>
 	<script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
+    <link rel="stylesheet" href="/static/scripts/jquery-ui/jquery-ui.min.css">
+	<style>
+		.subHeader{
+			display:inline;
+		}
+		.modal{
+			display:none;
+		}
+		.left{
+			float:right;
+		}
+		.validation{
+			color: red;
+		}
+		form div label{
+			display: block;
+		}
+		
+	</style>
 	</body>
 </html>

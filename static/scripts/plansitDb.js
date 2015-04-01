@@ -5,19 +5,24 @@ define(["jquery"], function($){
 	return {
 		
 		AddPlace: function(tripid, placeid, notes,categories){
-			$.ajax({
-				type: "Post",
-				data: {
-						tripid: tripid,
-						placeid:placeid,
-						notes: notes,
-						categories: categories
-					  },
-			  	url: "/place/add",
-			  	success: function(data){
-			  	}
-			});
-		},
+			if(tripid && placeid){
+				$.ajax({
+					type: "Post",
+					data: {
+							tripid: tripid,
+							placeid:placeid,
+							notes: notes,
+							categories: categories
+						  },
+				  	url: "/place/add",
+				  	success: function(data){
+				  	}
+				});	
+			}
+			else{
+				return {error: "Please select a trip and place id."};
+			}
+		},	
 		RemovePlace: function(tripid, ID){
 			$.ajax({
 				type:"Post",
@@ -32,25 +37,44 @@ define(["jquery"], function($){
 			});
 		},
 		AddTrip: function(tripName, description, departure, tripLength){
+			if(tripName) {
+				$.ajax({
+					data:{
+						"name": tripName,
+						"description": description,
+						"departure": departure,
+						"length": tripLength
+					},
+					url: "/trip/add",
+					success: function(data){
+					}
+				});
+			}
+			else{
+				return {error: "Please name your trip"};
+			}
+		},
+		RemoveTrip: function(tripid){
 			$.ajax({
 				data:{
-					"name": tripName,
-					"description": description,
-					"departure": departure,
-					"length": tripLength
+					"tripid": tripid
 				},
-				url: "/trip/add",
+				url: "trip/remove",
 				success: function(data){
 				}
 			});
 		},
-		GetTrip: function(tripid){
+		GetTrip: function(tripid, callback){
+			var Trip;
 			$.ajax({
 				data:{"tripid": tripid},
 				url: "/trip/get",
+				dataType:"json",
 				success:function(data){
+					callback(data);
 				}
 			});
+			return Trip;
 		},
 		GetUserData: function(){
 			$.ajax({

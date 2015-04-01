@@ -5,6 +5,9 @@
     <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
     <meta charset="utf-8">
     <style>
+        .hidden {
+            display: none;
+        }
         #map-canvas {
             height: 500px;
             width: 500px;
@@ -52,16 +55,35 @@
         background-color: none;
         color: red;
       }
+      span.right{
+        float:right;
+        margin-right:50%;
+      }
 
     </style>
     <link rel="stylesheet" href="/static/scripts/jquery-ui/jquery-ui.min.css">
     <script data-main="/static/scripts/map" src="/static/scripts/require.js"></script>
 </head>
 <body>
+    <div id="WaitDialog"   class="hidden" style="text-align: center">
+        <img  src="/static/images/loader.gif" />
+        <div style="margin-top: 10px; color: white">
+            <b>Please wait</b>
+        </div>
+    </div>
         <h1><a href="/">plansit</a></h1>
         <h2 id="tripHeader"></h2>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box">
-    <input id="toggleSavedMarkers" onclick="ToggleSavedMarkers()" type=button value="Toggle Saved Markers"></input><input onclick="ClearMarkers();" type=button value="Clear Unsaved Markers">
+    <input id="toggleSavedMarkers" onclick="ToggleSavedMarkers()" type=button value="Toggle Saved Markers"></input><input onclick="ClearMarkers();" type=button value="Clear Unsaved Markers"><input id="geoLocate" onclick="AttemptGeolocation()" type=button value="Find Me!"></input>
     <div id="map-canvas"></div>
+
+    <h2>Places</h2>
+    <div id="places">
+    </div>
+
+    <h2>Saved Places</h2>
+    <div id="savedPlaces">
+    </div>
+
 </body>
 </html>
