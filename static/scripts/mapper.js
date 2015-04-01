@@ -5,7 +5,7 @@ var myTripId;
 
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
-    "plansitDb",
+    "plansitDb"
     ], function(maps, ui, plansitDB){
     Initialize();
     plansitDb = plansitDB;
@@ -308,6 +308,11 @@ function GetPlaceDetails(marker) {
     });
 }
 
+var placeInfoWindow = function(placename, placeAddress){
+    return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
+        '</h3><div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div></div>');
+};
+
 function OpenInfoWindow(place, marker) {
     google.maps.event.addListener(marker, 'click', function () {
         if (infowindow) {
@@ -323,16 +328,8 @@ function OpenInfoWindow(place, marker) {
     var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
-    var contentString = '<div class="detailWindow">' +
-                            '<div id="siteNotice">' +
-                            '</div>' +
-                            '<h3 id="firstHeading" class="firstHeading">' + place.name + '</h3>' +
-                                '<div id="bodyContent">' +
-                                    '<h5 class="address">' + place.formatted_address + '</h5>' +
-                                '</div>' +
-                        '</div>';
-
-    infowindow.setContent(contentString);
+    
+    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address).html());
     infowindow.open(map, marker);
 
     if (photo) {
