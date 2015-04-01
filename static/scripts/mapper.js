@@ -1,6 +1,8 @@
 var plansitDb;
 var mySavedMarkers = [];
 var mySavedPlaces= [];
+var myTripId;
+
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
     "jquery-ui/jquery-ui",
     "plansitDb",
@@ -155,13 +157,7 @@ function CreateMarker(placeResult, isSavedBool) {
         isSaved: isSavedBool
     });
 
-    if(marker.isSaved==true){
-        AddMarkerToSavedPlaces(marker);
-        $("#savedPlaces").append("<div><p><a class='placeLink' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a></p>");
-    } else {
-        markers.push(marker);
-        $("places").append("<div><p>" + marker.title + "</p>");
-    }
+    AddMarkerToCollection(marker)   
 
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
@@ -169,12 +165,68 @@ function CreateMarker(placeResult, isSavedBool) {
     $(".placeLink").click(function(e){
         e.preventDefault();
         var savedPlaceId = $(this).attr("data-placeid");
-        var savedMarker = $.grep(mySavedMarkers, function(e){ return e.place.placeId == savedPlaceId; });
-        GetPlaceDetails(savedMarker[0]);
+        var savedPlace = $(this).attr("data-saved") == 'true';
+        if(savedPlace){
+            var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                return e.place.placeId == savedPlaceId;
+            });
+            GetPlaceDetails(savedMarker[0]);
+        }   
+        else {
+            var mapMarker = $.grep(markers, function(e){ 
+                return e.place.placeId == savedPlaceId;
+
+            });
+            GetPlaceDetails(mapMarker[0]);
+        }
     });
+    $(".deletePlace").click(function(e){
+        e.preventDefault();
+        var savedPlaceId = $(this).attr("data-placeid");
+        var savedPlace = $(this).attr("data-saved") == 'true';
+        if(savedPlace){
+            var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                return e.place.placeId == savedPlaceId;
+            });
+            var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
+            mySavedMarkers[savedIndex].setMap(null);
+
+            var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+                return e.placeid == savedPlaceId;
+            });
+            $("[data-placeid='" + savedPlaceId + "']").remove();
+
+               var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+
+                return e.placeid == savedPlaceId;
+            });
+            var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
+            if(placeindex > -1){
+                delete mySavedMarkers[placeIndex];
+            }
+            plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
+        }
+     });  
+       
     return marker;
 }
 
+function AddMarkerToCollection(marker){
+     if(marker.isSaved){
+        AddMarkerToSavedPlaces(marker);
+    } else {
+        markers.push(marker);
+    }
+    CreatePlaceListing(marker);
+}
+function CreatePlaceListing(marker){
+    if(marker.isSaved){
+        $("#savedPlaces").append("<div data-placeid='" + marker.place.placeId + "'><p><a class='placeLink' data-saved='true' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a><span class='right'><a class='deletePlace' data-saved='true' data-placeid="+ marker.place.placeId + ">X</a></span></p>"); 
+    }
+    else{
+        $("#places").append("<div><p><a class='placeLink' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a></p>");
+    }
+}
 function AddMarkerToSavedPlaces(placeMarker){
     mySavedMarkers.push(placeMarker);
 }
@@ -294,8 +346,9 @@ function OpenInfoWindow(place, marker) {
     }
     if (!isSaved) {
         $('#bodyContent').append('<button id="savePlace">Save To My Map</button>');
+        
         $('#savePlace').click(function(){
-            
+        
                 infowindow.close();
                 var categoryList = CreateCategoryList();
                 var modalText = $('<form id="dialog" title="'+place.name+'">' +
