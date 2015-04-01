@@ -308,12 +308,7 @@ function GetPlaceDetails(marker) {
     });
 }
 
-var placeInfoWindow = function(placename, placeAddress){
-    return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
-        '</h3><div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div></div>');
-};
-
-function OpenInfoWindow(place, marker) {
+function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     google.maps.event.addListener(marker, 'click', function () {
         if (infowindow) {
             infowindow.close();
@@ -329,52 +324,62 @@ function OpenInfoWindow(place, marker) {
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
     
-    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address).html());
+    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved).html());
     infowindow.open(map, marker);
+   
+    if (!isSaved) {        
+        $('#savePlace').click(function(){        
+            infowindow.close();
+            var modalText = savePlaceWindow(place.name);
+            modalText.dialog();
 
-    if (photo) {
-        $('#bodyContent').append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
-    }
-    if (rating) {
-        $('#bodyContent').append('<p class="rating">Rating: ' + rating + '</p>');
-    }
-    if (phone) {
-        $('#bodyContent').append('<p class="phone">Phone: ' + phone + '</p>');
-    }
-    if (!isSaved) {
-        $('#bodyContent').append('<button id="savePlace">Save To My Map</button>');
-        
-        $('#savePlace').click(function(){
-        
-                infowindow.close();
-                var categoryList = CreateCategoryList();
-                var modalText = $('<form id="dialog" title="'+place.name+'">' +
-                                    '<div>' +
-                                        '<textarea id="myNotes" rows="3" name="notes" cols="27" placeholder="Save your notes here..."></textarea>' +
-                                    '</div>' +
-                                    categoryList.html() + '<input type="submit" value="Submit">' +
-                                '</form>');
-                modalText.dialog();
-
-                modalText.submit(function(event){
-                    event.preventDefault();
-                    var myNotes = document.getElementById("myNotes").value;
-                    var categories =  [];
-                    $("input[name='categories']:checked").each(function() {
-                      categories.push($(this).val());
-                    });
-                    place.categories = categories;
-                    place.notes = myNotes;
-                    place.isSaved = true;
-                    arrayForPlace = [];
-                    listOfCheckedBoxes = null;
-                    myNotes = null;
-
-                    SavePlace(place);
-                    modalText.dialog('destroy').remove();
+            modalText.submit(function(event){
+                event.preventDefault();
+                var myNotes = document.getElementById("myNotes").value;
+                var categories =  [];
+                $("input[name='categories']:checked").each(function() {
+                  categories.push($(this).val());
                 });
+                place.categories = categories;
+                place.notes = myNotes;
+                place.isSaved = true;
+                arrayForPlace = [];
+                listOfCheckedBoxes = null;
+                myNotes = null;
+
+                SavePlace(place);
+                modalText.dialog('destroy').remove();
+            });
         });
     }
+}
+
+var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved){
+    var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
+    if (photo) {
+        bodyContent.append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
+    }
+    if (rating) {
+        bodyContent.append('<p class="rating">Rating: ' + rating + '</p>');
+    }
+    if (phone) {
+        bodyContent.append('<p class="phone">Phone: ' + phone + '</p>');
+    }
+    if (!isSaved) {
+        bodyContent.append('<button id="savePlace">Save To My Map</button>');
+    }
+    return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
+        '</h3>' + bodyContent.html() + '</div>');
+}
+
+var savePlaceWindow = function(name){
+    var categoryList = CreateCategoryList();
+    return $('<form id="dialog" title="'+name+'">' +
+                                '<div>' +
+                                    '<textarea id="myNotes" rows="3" name="notes" cols="27" placeholder="Save your notes here..."></textarea>' +
+                                '</div>' +
+                                categoryList.html() + '<input type="submit" value="Submit">' +
+                            '</form>');
 }
 
 function SavePlace(place){
