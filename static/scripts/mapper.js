@@ -265,13 +265,18 @@ function HandleNoGeolocation(errorFlag) {
 }
 
 function ShowWaitLoader(){
-    var waitDialog = $('#WaitDialog');
-    waitDialog.dialog();
+    var waitDialog = $('#loading');
+    var waitImage = $('#loading-image');
+    waitDialog.addClass('loading');
+    waitImage.addClass('loading-image');
 }
 
 function CloseWaitLoader(){
-    var waitDialog = $('#WaitDialog');
-    waitDialog.dialog('close');
+    var waitDialog = $('#loading');
+    var waitImage = $('#loading-image');
+    waitDialog.removeClass('loading');
+    waitImage.removeClass('loading-image');
+
 }
 
 function AttemptGeolocation() {
@@ -361,13 +366,13 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     var notes = (place.notes == null) ? null : place.notes;
     var category = (place.category == null) ? null : place.category;
     
-    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category).html());
+    infowindow.setContent(PlaceInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category).html());
     infowindow.open(map, marker);
    
     if (!isSaved) {        
         $('#savePlace').click(function(){        
             infowindow.close();
-            var modalText = savePlaceWindow(place.name);
+            var modalText = SavePlaceWindow(place.name);
             modalText.dialog();
 
             modalText.submit(function(event){
@@ -391,7 +396,7 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     }
 }
 
-var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category){
+var PlaceInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category){
     var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
     if (photo) {
         bodyContent.append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
@@ -415,7 +420,7 @@ var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, is
         '</h3>' + bodyContent.html() + '</div>');
 }
 
-var savePlaceWindow = function(name){
+var SavePlaceWindow = function(name){
     var categoryList = CreateCategoryList();
     return $('<form id="dialog" title="'+name+'">' +
                                 '<div>' +
