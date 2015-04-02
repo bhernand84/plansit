@@ -14,6 +14,7 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
 
    var Trips = plansitDb.GetTrip(myTripId, LoadTrip);    
    plansitDb.GetUserData();
+   AddPlaceDetailsEvents();
 });
 
 var map;
@@ -65,7 +66,7 @@ function Initialize() {
     setTimeout(AddMapListeners(input, searchBox), 1);  
     map.setZoom(15);
 
-    setTimeout(LoadSavedPlaces(placesFromDb), 3000);
+    LoadSavedPlaces(placesFromDb);
 }
 
 function AddMapListeners(input, searchBox, types){
@@ -86,7 +87,6 @@ function AddMapListeners(input, searchBox, types){
             CreateMarker(place);            
             bounds.extend(place.geometry.location);
         }
-
         map.fitBounds(bounds);
     });
     // Bias the SearchBox results towards places that are within the bounds of the
@@ -115,7 +115,7 @@ function LoadSavedPlaces(){
             });            
         }
         map.setCenter(bounds.getCenter());
-        ToggleSavedMarkers();
+        ToggleSavedMarkers();        
     }  
 }
 
@@ -167,7 +167,11 @@ function CreateMarker(placeResult, isSavedBool) {
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
     });
-    $(".placeLink").click(function(e){
+    return marker;
+}
+function AddPlaceDetailsEvents()
+{
+    $("#savedPlaces, #places").on("click", ".placeLink", function(e){
         e.preventDefault();
         var savedPlaceId = $(this).attr("data-placeid");
         var savedPlace = $(this).attr("data-saved") == 'true';
@@ -185,8 +189,9 @@ function CreateMarker(placeResult, isSavedBool) {
             GetPlaceDetails(mapMarker[0]);
         }
     });
-    if(marker.isSaved){
-        $(".deletePlace").click(function(e){
+
+       
+    $("#savedPlaces, #places").on("click", ".deletePlace", function(e){
             e.preventDefault();
             var savedPlaceId = $(this).attr("data-placeid");
             var savedPlace = $(this).attr("data-saved") == 'true';
@@ -197,8 +202,6 @@ function CreateMarker(placeResult, isSavedBool) {
                 DeletePlace(savedMarker, savedPlaceId);
             }
         });  
-    }   
-    return marker;
 }
 
 function DeletePlace(savedMarker, savedPlaceId){
@@ -217,7 +220,8 @@ function DeletePlace(savedMarker, savedPlaceId){
                 });
                 var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
                 if(placeindex > -1){
-                    delete mySavedMarkers[placeindex];
+                    mySavedMarkers.splice(placeindex,1);
+                    console.log(mySavedMarkers);
                 }
                 plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
 }
@@ -366,10 +370,8 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     var notes = (place.notes == null) ? null : place.notes;
     var category = (place.category == null) ? null : place.category;
     
-    infowindow.setContent(PlaceInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category).html());
+    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category, place.placeid).html());
     infowindow.open(map, marker);
-   
-    if (!isSaved) {        
         $('#savePlace').click(function(){        
             infowindow.close();
             var modalText = SavePlaceWindow(place.name);
@@ -393,11 +395,11 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
                 modalText.dialog('destroy').remove();
             });
         });
-    }
+    
 }
 
-var PlaceInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category){
-    var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
+var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category, placeid){
+   var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
     if (photo) {
         bodyContent.append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
     }
@@ -414,7 +416,7 @@ var PlaceInfoWindow = function(placename, placeAddress, photo, rating, phone, is
     }
 
     if (!isSaved) {
-        bodyContent.append('<button id="savePlace">Save To My Map</button>');
+        bodyContent.append('<button id="savePlace" data-placeid="'+ placeid + '">Save To My Map</button>');
     }
     return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
         '</h3>' + bodyContent.html() + '</div>');
