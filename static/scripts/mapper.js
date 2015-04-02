@@ -65,7 +65,7 @@ function Initialize() {
     setTimeout(AddMapListeners(input, searchBox), 1);  
     map.setZoom(15);
 
-    setTimeout(LoadSavedPlaces(placesFromDb), 3000);
+    LoadSavedPlaces(placesFromDb);
 }
 
 function AddMapListeners(input, searchBox, types){
@@ -86,6 +86,7 @@ function AddMapListeners(input, searchBox, types){
             CreateMarker(place);            
             bounds.extend(place.geometry.location);
         }
+        AddPlaceDetailsEvents();
 
         map.fitBounds(bounds);
     });
@@ -115,7 +116,9 @@ function LoadSavedPlaces(){
             });            
         }
         map.setCenter(bounds.getCenter());
-        ToggleSavedMarkers();
+        ToggleSavedMarkers();        
+        AddPlaceDetailsEvents();
+
     }  
 }
 
@@ -167,6 +170,10 @@ function CreateMarker(placeResult, isSavedBool) {
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
     });
+    return marker;
+}
+function AddPlaceDetailsEvents()
+{
     $(".placeLink").click(function(e){
         e.preventDefault();
         var savedPlaceId = $(this).attr("data-placeid");
@@ -185,7 +192,6 @@ function CreateMarker(placeResult, isSavedBool) {
             GetPlaceDetails(mapMarker[0]);
         }
     });
-    if(marker.isSaved){
         $(".deletePlace").click(function(e){
             e.preventDefault();
             var savedPlaceId = $(this).attr("data-placeid");
@@ -197,8 +203,6 @@ function CreateMarker(placeResult, isSavedBool) {
                 DeletePlace(savedMarker, savedPlaceId);
             }
         });  
-    }   
-    return marker;
 }
 
 function DeletePlace(savedMarker, savedPlaceId){
@@ -217,7 +221,8 @@ function DeletePlace(savedMarker, savedPlaceId){
                 });
                 var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
                 if(placeindex > -1){
-                    delete mySavedMarkers[placeindex];
+                    mySavedMarkers.splice(placeindex,1);
+                    console.log(mySavedMarkers);
                 }
                 plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
 }
@@ -361,10 +366,8 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     var notes = (place.notes == null) ? null : place.notes;
     var category = (place.category == null) ? null : place.category;
     
-    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category).html());
+    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category, place.placeid).html());
     infowindow.open(map, marker);
-   
-    if (!isSaved) {        
         $('#savePlace').click(function(){        
             infowindow.close();
             var modalText = savePlaceWindow(place.name);
@@ -388,10 +391,10 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
                 modalText.dialog('destroy').remove();
             });
         });
-    }
+    
 }
 
-var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category){
+var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category, placeid){
     var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
     if (photo) {
         bodyContent.append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
@@ -409,7 +412,7 @@ var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, is
     }
 
     if (!isSaved) {
-        bodyContent.append('<button id="savePlace">Save To My Map</button>');
+        bodyContent.append('<button id="savePlace" data-placeid="'+ placeid + '">Save To My Map</button>');
     }
     return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
         '</h3>' + bodyContent.html() + '</div>');
@@ -436,6 +439,7 @@ function SavePlace(place){
     plansitDb.AddPlace(myTripId, newPlaceId, newNotes, newCategory);
     var newMarker = CreateMarker(place);
     newMarker = AddMarkerToSavedPlaces(newMarker);
+        AddPlaceDetailsEvents();
 }
 
 function CreateCategoryList(){
@@ -467,6 +471,7 @@ function Callback(results, status) {
             var place = results[i];
             CreateMarker(place);
         }
+        AddPlaceDetailsEvents();
         map.fitBounds(bounds);
     }
 }
