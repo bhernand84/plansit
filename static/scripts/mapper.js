@@ -169,8 +169,8 @@ function CreateMarker(placeResult, isSavedBool) {
     });
     return marker;
 }
-function AddPlaceDetailsEvents()
-{
+
+function AddPlaceDetailsEvents(){
     $("#savedPlaces, #places").on("click", ".placeLink", function(e){
         e.preventDefault();
         var savedPlaceId = $(this).attr("data-placeid");
@@ -184,7 +184,6 @@ function AddPlaceDetailsEvents()
         else {
             var mapMarker = $.grep(markers, function(e){ 
                 return e.place.placeId == savedPlaceId;
-
             });
             GetPlaceDetails(mapMarker[0]);
         }
@@ -207,8 +206,6 @@ function AddPlaceDetailsEvents()
 function DeletePlace(savedMarker, savedPlaceId){
     var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
                 mySavedMarkers = RefreshSavedMarkersArray(savedIndex);
-                console.log(mySavedMarkers);
-                
                 var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
                     return e.placeid == savedPlaceId;
                 });
@@ -221,7 +218,6 @@ function DeletePlace(savedMarker, savedPlaceId){
                 var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
                 if(placeindex > -1){
                     mySavedMarkers.splice(placeindex,1);
-                    console.log(mySavedMarkers);
                 }
                 plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
 }
