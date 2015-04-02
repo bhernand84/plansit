@@ -185,34 +185,37 @@ function CreateMarker(placeResult, isSavedBool) {
             GetPlaceDetails(mapMarker[0]);
         }
     });
-    $(".deletePlace").click(function(e){
-        e.preventDefault();
-        var savedPlaceId = $(this).attr("data-placeid");
-        var savedPlace = $(this).attr("data-saved") == 'true';
-        if(savedPlace){
-            var savedMarker = $.grep(mySavedMarkers, function(e){ 
-                return e.place.placeId == savedPlaceId;
-            });
-            var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
-            mySavedMarkers[savedIndex].setMap(null);
+    if(marker.isSaved){
+        $(".deletePlace").click(function(e){
+            e.preventDefault();
+            var savedPlaceId = $(this).attr("data-placeid");
+            console.log(savedPlaceId);
+            console.log(e);
+            var savedPlace = $(this).attr("data-saved") == 'true';
+            if(savedPlace){
+                var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                    return e.place.placeId == savedPlaceId;
+                });
+                var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
+                mySavedMarkers[savedIndex].setMap(null);
 
-            var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
-                return e.placeid == savedPlaceId;
-            });
-            $("[data-placeid='" + savedPlaceId + "']").remove();
+                var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+                    return e.placeid == savedPlaceId;
+                });
+                $("[data-placeid='" + savedPlaceId + "']").remove();
 
-               var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+                   var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
 
-                return e.placeid == savedPlaceId;
-            });
-            var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
-            if(placeindex > -1){
-                delete mySavedMarkers[placeindex];
+                    return e.placeid == savedPlaceId;
+                });
+                var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
+                if(placeindex > -1){
+                    delete mySavedMarkers[placeindex];
+                }
+                plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
             }
-            plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
-        }
-     });  
-       
+        });  
+    }   
     return marker;
 }
 
