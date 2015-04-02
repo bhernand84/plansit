@@ -14,6 +14,7 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
 
    var Trips = plansitDb.GetTrip(myTripId, LoadTrip);    
    plansitDb.GetUserData();
+   AddPlaceDetailsEvents();
 });
 
 var map;
@@ -86,8 +87,6 @@ function AddMapListeners(input, searchBox, types){
             CreateMarker(place);            
             bounds.extend(place.geometry.location);
         }
-        AddPlaceDetailsEvents();
-
         map.fitBounds(bounds);
     });
     // Bias the SearchBox results towards places that are within the bounds of the
@@ -117,8 +116,6 @@ function LoadSavedPlaces(){
         }
         map.setCenter(bounds.getCenter());
         ToggleSavedMarkers();        
-        AddPlaceDetailsEvents();
-
     }  
 }
 
@@ -174,7 +171,7 @@ function CreateMarker(placeResult, isSavedBool) {
 }
 function AddPlaceDetailsEvents()
 {
-    $(".placeLink").click(function(e){
+    $("#savedPlaces, #places").on("click", ".placeLink", function(e){
         e.preventDefault();
         var savedPlaceId = $(this).attr("data-placeid");
         var savedPlace = $(this).attr("data-saved") == 'true';
@@ -192,7 +189,9 @@ function AddPlaceDetailsEvents()
             GetPlaceDetails(mapMarker[0]);
         }
     });
-        $(".deletePlace").click(function(e){
+
+       
+    $("#savedPlaces, #places").on("click", ".deletePlace", function(e){
             e.preventDefault();
             var savedPlaceId = $(this).attr("data-placeid");
             var savedPlace = $(this).attr("data-saved") == 'true';
@@ -439,7 +438,6 @@ function SavePlace(place){
     plansitDb.AddPlace(myTripId, newPlaceId, newNotes, newCategory);
     var newMarker = CreateMarker(place);
     newMarker = AddMarkerToSavedPlaces(newMarker);
-        AddPlaceDetailsEvents();
 }
 
 function CreateCategoryList(){
@@ -471,7 +469,6 @@ function Callback(results, status) {
             var place = results[i];
             CreateMarker(place);
         }
-        AddPlaceDetailsEvents();
         map.fitBounds(bounds);
     }
 }
