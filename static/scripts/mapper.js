@@ -349,7 +349,9 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
-
+    var notes = (place.notes == null) ? null : place.notes;
+    var category = (place.category == null) ? null : place.category;
+    
     infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category).html());
     infowindow.open(map, marker);
    
@@ -380,7 +382,7 @@ function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
     }
 }
 
-var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved){
+var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category){
     var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
     if (photo) {
         bodyContent.append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
@@ -393,8 +395,8 @@ var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, is
     }
 
     if (isSaved){
-        $('#bodyContent').append('<p class="notes">My Notes: ' + notes + '</p>');
-        $('#bodyContent').append('<p class="category">Categories: ' + category + '</p>');
+        bodyContent.append('<p class="notes">My Notes: ' + notes + '</p>');
+        bodyContent.append('<p class="category">Categories: ' + category + '</p>');
     }
 
     if (!isSaved) {
