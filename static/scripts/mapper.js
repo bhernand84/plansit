@@ -18,12 +18,12 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
 });
 
 function LoadTrip(trips){
-if(trips){
-    if(trips.places){
-        mySavedPlaces = trips.places;
-    }
-    $("#tripHeader").html(trips.name);
-        LoadSavedPlaces();
+    if(trips){
+        if(trips.places){
+            mySavedPlaces = trips.places;
+        }
+        $("#tripHeader").html(trips.name);
+            LoadSavedPlaces();
     }
 }
 
@@ -76,6 +76,7 @@ function Initialize() {
     addSearchBoxToMap();
     AddPlaceResultListeners();
 }
+
 function getMapOptions () {
     return {
         zoom: 14,
@@ -83,8 +84,10 @@ function getMapOptions () {
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
 }
+
 function addSearchBoxToMap(){
     var input = (document.getElementById('pac-input'));
+
     var searchBox = new google.maps.places.SearchBox((input));
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
 
