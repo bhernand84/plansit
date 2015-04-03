@@ -207,7 +207,6 @@ function CreateMarker(placeResult) {
     var image =  getMarkerImage(placeResult.icon);
 
     isSavedBool = IsAlreadySaved(placeResult);
-
     var placeLoc = placeResult.geometry.location;
 
     var marker = new google.maps.Marker({
@@ -231,7 +230,7 @@ function CreateMarker(placeResult) {
 }
 
 function IsAlreadySaved(place){
-   if(place.isSaved){
+   if(place.isSaved == true){
         return true;
    }
    if(mySavedMarkers.length==0){
@@ -239,7 +238,7 @@ function IsAlreadySaved(place){
     }
     else {
         for(var i = 0, savedMarker= mySavedMarkers[i]; i < mySavedMarkers.length; i++){
-            if(savedMarker.place.place_id = place.place_id){
+            if(savedMarker.place.place_id == place.place_id){
                 return true;
             }
         }   
@@ -425,7 +424,7 @@ function OpenInfoWindow(place, marker, photo, rating, phone) {
             infowindow.close();
         }
     });
-    var isSaved = place.isSaved;
+    var isSaved = marker.isSaved;
     var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
@@ -471,13 +470,11 @@ var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, is
     if (phone) {
         bodyContent.append('<p class="phone">Phone: ' + phone + '</p>');
     }
-
-    if (isSaved){
+    if (isSaved == true){
         bodyContent.append('<p class="notes">My Notes: ' + notes + '</p>');
         bodyContent.append('<p class="category">Categories: ' + category + '</p>');
     }
-
-    if (!isSaved) {
+    else {
         bodyContent.append('<button id="savePlace" data-placeid="'+ placeid + '">Save To My Map</button>');
     }
     return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
