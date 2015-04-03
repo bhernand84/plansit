@@ -1,130 +1,167 @@
+
+@font-face {
+    font-family: AvenirNextLTPro-Bold;
+    src: url('/static/fonts/AvenirNextLTPro-Bold.otf'); 
+}
+* {
+    font-family: AvenirNextLTPro-Bold;
+}
 html,body{
-            height: 100%;
-        }
-        .myButton {
-            -moz-box-shadow:inset 0px 1px 0px 0px #dcecfb;
-            -webkit-box-shadow:inset 0px 1px 0px 0px #dcecfb;
-            box-shadow:inset 0px 1px 0px 0px #dcecfb;
-            background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #bddbfa), color-stop(1, #80b5ea));
-            background:-moz-linear-gradient(top, #bddbfa 5%, #80b5ea 100%);
-            background:-webkit-linear-gradient(top, #bddbfa 5%, #80b5ea 100%);
-            background:-o-linear-gradient(top, #bddbfa 5%, #80b5ea 100%);
-            background:-ms-linear-gradient(top, #bddbfa 5%, #80b5ea 100%);
-            background:linear-gradient(to bottom, #bddbfa 5%, #80b5ea 100%);
-            filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#bddbfa', endColorstr='#80b5ea',GradientType=0);
-            background-color:#bddbfa;
-            -moz-border-radius:6px;
-            -webkit-border-radius:6px;
-            border-radius:6px;
-            border:1px solid #84bbf3;
-            display:inline-block;
-            cursor:pointer;
-            color:#ffffff;
-            font-family:arial;
-            font-size:15px;
-            font-weight:bold;
-            padding:5px 24px;
-            text-decoration:none;
-            text-shadow:0px 1px 0px #528ecc;
-            margin-left: 4px;
-            margin-right: 4px;
-            margin-bottom: 3px;
-        }
-        .myButton:hover {
-            background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #80b5ea), color-stop(1, #bddbfa));
-            background:-moz-linear-gradient(top, #80b5ea 5%, #bddbfa 100%);
-            background:-webkit-linear-gradient(top, #80b5ea 5%, #bddbfa 100%);
-            background:-o-linear-gradient(top, #80b5ea 5%, #bddbfa 100%);
-            background:-ms-linear-gradient(top, #80b5ea 5%, #bddbfa 100%);
-            background:linear-gradient(to bottom, #80b5ea 5%, #bddbfa 100%);
-            filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#80b5ea', endColorstr='#bddbfa',GradientType=0);
-            background-color:#80b5ea;
-        }
-        .myButton:active {
-            position:relative;
-            top:1px;
-        }
-        .hidden {
-            display: none;
-        }
-        #map-canvas {
-            height: 500px;
-            width: 95%;
-            margin: auto;
-            padding: 0px;
-            border-radius: 15px;
-            position: center;
-            border: solid 1px #4d90fe;
-        }
-        #pac-input {
-            background-color: #fff;
-            font-family: Roboto;
-            font-size: 15px;
-            font-weight: 300;
-            margin-left: 12px;
-            padding: 0 11px 0 13px;
-            text-overflow: ellipsis;
-            width: 200px;
-        }
-        #pac-input:focus {
-            border-color: #4d90fe;
-        }
-        .controls {
-            margin-top: 16px;
-            border: 1px solid transparent;
-            border-radius: 2px 0 0 2px;
-            box-sizing: border-box;
-            -moz-box-sizing: border-box;
-            height: 32px;
-            outline: none;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
-        }
-        .detailWindow{
-            max-width: 200px;
-        }
-        #distance-selector {
-            color: #fff;
-            background-color: #4d90fe;
-            padding: 5px 11px 0px 11px;
-            max-width: 400px;
-        }
-        #distance-selector label {
-            font-family: Roboto;
-            font-size: 13px;
-            font-weight: 300;
-        }
-        button#savePlace {
-            background-color: none;
-            color: red;
-        }
-        span.right{
-            float:right;
-            margin-right:50%;
-        }
-        .loading {
-            width: 100%;
-            height: 100%;
-            top: 0px;
-            left: 0px;
-            position: fixed;
-            display: block;
-            opacity: .9;
-            background-color: #666;
-            z-index: 99;
-            text-align: center;
-            vertical-align: middle;
-        }
-        .loading-image {
-            position: center;
-            vertical-align: middle;
-            width: 20%;
-            height: auto;
-            margin-top: 10%;
-        }
-        #mapperButtons {
-            text-align: center;
-            width: 100%;
-            display: inline-block;
-            position: center;
-            margin: auto;
-        }
+    height: 100%;
+    background-color: #EFFBFB;
+}
+.myButton {
+    -moz-box-shadow: 0px 10px 14px -7px #60a34e;
+    -webkit-box-shadow: 0px 10px 14px -7px #60a34e;
+    box-shadow: 0px 10px 14px -7px #60a34e;
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #51b06a), color-stop(1, #449615));
+    background:-moz-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:-webkit-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:-o-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:-ms-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:linear-gradient(to bottom, #51b06a 5%, #449615 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#51b06a', endColorstr='#449615',GradientType=0);
+    background-color:#51b06a;
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    border-radius:4px;
+    border:2px solid #bcd6bf;
+    display:inline-block;
+    cursor:pointer;
+    color:#ffffff;
+    font-size:13px;
+    font-weight:bold;
+    padding:8px 12px;
+    text-decoration:none;
+    text-shadow:0px 1px 0px #0a1a08;
+    margin-left: 4px;
+    margin-right: 4px;
+    margin-bottom: 7px;
+    min-width: 30%;
+}
+.myButton:hover {
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #449615), color-stop(1, #51b06a));
+    background:-moz-linear-gradient(top, #449615 5%, #51b06a 100%);
+    background:-webkit-linear-gradient(top, #449615 5%, #51b06a 100%);
+    background:-o-linear-gradient(top, #449615 5%, #51b06a 100%);
+    background:-ms-linear-gradient(top, #449615 5%, #51b06a 100%);
+    background:linear-gradient(to bottom, #449615 5%, #51b06a 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#449615', endColorstr='#51b06a',GradientType=0);
+    background-color:#449615;
+}
+.myButton:active {
+    position:relative;
+    top:1px;
+}
+.hidden {
+    display: none;
+}
+#map-canvas {
+    height: 500px;
+    width: 95%;
+    margin: auto;
+    padding: 0px;
+    border-radius: 15px;
+    position: center;
+    border: solid 2px #008A2E;
+}
+#pac-input {
+    background-color: #fff;
+    font-family: Roboto;
+    font-size: 15px;
+    font-weight: 300;
+    margin-left: 12px;
+    padding: 0 11px 0 13px;
+    text-overflow: ellipsis;
+    width: 200px;
+}
+#pac-input:focus {
+    border-color: #008A2E;
+}
+.controls {
+    margin-top: 16px;
+    border: 1px solid transparent;
+    border-radius: 2px 0 0 2px;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    height: 32px;
+    outline: none;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+.detailWindow{
+    max-width: 200px;
+}
+#distance-selector {
+    color: #fff;
+    background-color: #4d90fe;
+    padding: 5px 11px 0px 11px;
+    max-width: 400px;
+}
+#distance-selector label {
+    font-family: Roboto;
+    font-size: 13px;
+    font-weight: 300;
+}
+button#savePlace {
+    background-color: none;
+    color: red;
+}
+span.right{
+    float:right;
+    margin-right:50%;
+}
+.loading {
+    width: 100%;
+    height: 100%;
+    top: 0px;
+    left: 0px;
+    position: fixed;
+    display: block;
+    opacity: .9;
+    background-color: #666;
+    z-index: 99;
+    text-align: center;
+    vertical-align: middle;
+}
+.loading-image {
+    position: center;
+    vertical-align: middle;
+    width: 20%;
+    height: auto;
+    margin-top: 10%;
+}
+#mapperButtons {
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+    position: center;
+    margin: auto;
+}
+.tripHeader {
+    display: inline-block;
+    color: white;
+    background-image: url("/static/images/roadsign.svg");
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    width: 100%;
+    text-align: center;
+    height: 10%;
+    vertical-align: middle;
+    line-height: 100%;
+    margin-bottom: 3%;
+}
+.tripHeader h2 {
+    line-height:0;
+    height:100%;
+    width:100%;
+    margin: 0px;
+    text-shadow: 2px 2px 3px #0B6121;
+}
+.tripHeader h2:before {
+    content:"";
+    display:block;
+    height:50%;
+    width:100%;
+}
+

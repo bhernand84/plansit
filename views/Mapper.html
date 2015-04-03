@@ -13,15 +13,17 @@
         <div id="loading-content">
             <img  id="loading-image" src="/static/images/loader.gif" alt="Loading..."/>
             <div style="margin-top: 10px; color: white">
-                <b>Please wait</b>
+                <b>Please Wait...</b>
             </div>
         </div>
     </div>
         <h1><a href="/">plansit</a></h1>
-        <h2 id="tripHeader"></h2>
-    <input id="pac-input" class="controls hidden" type="text" placeholder="Search Box"/>
+        <div class="tripHeader">
+            <h2 id="tripHeader"></h2>
+        </div>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box"></input>
     <div id="mapperButtons">
-        <input id="toggleSavedMarkers" class="myButton" onclick="ToggleSavedMarkers()" type=button value="Toggle Saved Markers"></input><input onclick="ClearMarkers();" class="myButton" type=button value="Clear Unsaved Markers"><input id="geoLocate" class="myButton" onclick="AttemptGeolocation()" type=button value="Find Me!"></input>
+        <input id="toggleSavedMarkers" class="myButton" onclick="ToggleSavedMarkers()" type=button value="Show Saved"></input><input onclick="ClearMarkers();" class="myButton" type=button value="Clear"><input id="geoLocate" class="myButton" onclick="AttemptGeolocation()" type=button value="Find Me!"></input>
     </div>
     <div id="map-canvas"></div>
 
