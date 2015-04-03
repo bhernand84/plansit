@@ -13,7 +13,7 @@ _	"log"
 
 var (
 	indexTemplate = template.Must(template.ParseFiles("views/index.html"))
-	mapperTemplate = template.Must(template.ParseFiles("views/mapper.html"))
+	mapperTemplate = template.Must(template.ParseFiles("views/Mapper.html"))
 	currentUser *models.PlansitUser
 )
 func init(){

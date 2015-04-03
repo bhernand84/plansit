@@ -1,19 +1,22 @@
 var plansitDb;
-var mySavedMarkers = [];
+var placesFromDb = [];
+var mySavedMarkers = [];    
 var mySavedPlaces= [];
 var myTripId;
 
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
-    "jquery-ui/jquery-ui",
-    "plansitDb",
-    ], function(maps, ui, plansitDB){
-    Initialize();
-    plansitDb = plansitDB;
-    myTripId = getRequestParameter("tripid");
+   "jquery-ui/jquery-ui",
+   "plansitDb"
+   ], function(maps, ui, plansitDB){
+   Initialize();
+   plansitDb = plansitDB;
+   myTripId = getRequestParameter("tripid");
 
-    var Trips = plansitDb.GetTrip(myTripId, LoadTrip);    
-    plansitDb.GetUserData();
+   var Trips = plansitDb.GetTrip(myTripId, LoadTrip);    
+   plansitDb.GetUserData();
+   AddPlaceDetailsEvents();
 });
+
 function LoadTrip(trips){
 if(trips){
     if(trips.places){
@@ -48,6 +51,24 @@ function LoadSavedPlaces(){
 }
 
 var map;
+
+var mapOptions;
+var browserSupportFlag;
+var infowindow;
+var markers = [];
+var toggleSavedPlaces = true;
+var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
+
+function LoadTrip(trips){
+    if(trips){
+        if(trips.places){
+            mySavedPlaces = trips.places;
+        }
+        $("#tripHeader").html(trips.name);
+        LoadSavedPlaces();
+        }
+}
+
 function Initialize() {
     mapOptions = getMapOptions();
     map = new google.maps.Map(document.getElementById('map-canvas'),
@@ -70,6 +91,7 @@ function addSearchBoxToMap(){
     var autocomplete = new google.maps.places.Autocomplete(input);
     place = autocomplete.getPlace();
     autocomplete.bindTo('bounds', map);
+
     AddMapListeners(input, searchBox);
 }
 function AddPlaceResultListeners(){
@@ -114,7 +136,7 @@ function AddPlaceResultListeners(){
                 });
                 var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
                 if(placeindex > -1){
-                    delete mySavedMarkers[placeIndex];
+                    delete mySavedMarkers[placeindex];
                 }
                 plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
             }
@@ -145,9 +167,30 @@ function DisplayPlaces(places){
         }
         map.fitBounds(bounds);
 }
-
 function ClearPlaceListings(){
     $("#places div").remove()
+}
+function LoadSavedPlaces(){
+    if(mySavedPlaces.length != 0){
+        var bounds = new google.maps.LatLngBounds();
+        for(var i = 0, savedPlace; savedPlace = mySavedPlaces[i]; i++){
+            var service = new google.maps.places.PlacesService(map);
+            request = {
+                placeId: savedPlace.placeid
+            };
+
+            service.getDetails(request, function (place, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    place.isSaved = true;
+                    var newMarker = CreateMarker(place);
+                    bounds.extend(place.geometry.location);
+                    map.fitBounds(bounds);
+                }
+            });            
+        }
+        map.setCenter(bounds.getCenter());
+        ToggleSavedMarkers();        
+    }  
 }
 function ClearMarkers() {
     for (var i = 0; i < markers.length; i++ ) {
@@ -180,7 +223,7 @@ function CreateMarker(placeResult) {
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
     });
-       
+
     return marker;
 }
 
@@ -212,38 +255,74 @@ function getMarkerImage(icon){
             scaledSize: new google.maps.Size(25, 25)
         };
 }
-var browserSupportFlag;
-var infowindow;
-var markers = [];
-var toggleSavedPlaces = true;
-var categories = ["Breakfast", "Brunch", "Lunch", "Dinner", "Happy Hour", "Dancing", "Live Music", "Historic", "Park"];
+function AddPlaceDetailsEvents()
+{
+    $("#savedPlaces, #places").on("click", ".placeLink", function(e){
+        e.preventDefault();
+        var savedPlaceId = $(this).attr("data-placeid");
+        var savedPlace = $(this).attr("data-saved") == 'true';
+        if(savedPlace){
+            var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                return e.place.placeId == savedPlaceId;
+            });
+            GetPlaceDetails(savedMarker[0]);
+        }   
+        else {
+            var mapMarker = $.grep(markers, function(e){ 
+                return e.place.placeId == savedPlaceId;
 
-
-
-function GetMarkersFromSaved(places){
-    $.each(places, function(place){
-        mySavedMarkers.push({
-            placeid: place.placeId, 
-            notes: place.notes, 
-            categories: place.categories
-        });
+            });
+            GetPlaceDetails(mapMarker[0]);
+        }
     });
+
+       
+    $("#savedPlaces, #places").on("click", ".deletePlace", function(e){
+            e.preventDefault();
+            var savedPlaceId = $(this).attr("data-placeid");
+            var savedPlace = $(this).attr("data-saved") == 'true';
+            if(savedPlace){
+                var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                    return e.place.placeId == savedPlaceId;
+                });
+                DeletePlace(savedMarker, savedPlaceId);
+            }
+        });  
+}
+
+function DeletePlace(savedMarker, savedPlaceId){
+    var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
+    RemoveItemFromSavedMarkersArray(savedIndex);
+    
+    $("[data-placeid='" + savedPlaceId + "']").remove();
+
+   var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+        return e.placeid == savedPlaceId;
+    });
+    plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
+
+    var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
+    if(placeindex > -1){
+        mySavedPlaces.splice(placeindex,1);
+    }
+}
+
+function RemoveItemFromSavedMarkersArray(indexOfRemovedItem){
+        mySavedMarkers[indexOfRemovedItem].setMap(null);
+        mySavedMarkers.splice(indexOfRemovedItem, 1);
 }
 
 
-
-
-
-
-
 function AddMarkerToCollection(marker){
-     if(marker.isSaved){
+    if(marker.isSaved){
         AddMarkerToSavedPlaces(marker);
-    } else {
+    } 
+    else {
         markers.push(marker);
     }
     CreatePlaceListing(marker);
 }
+
 function CreatePlaceListing(marker){
     if(marker.isSaved){
         $("#savedPlaces").append("<div data-placeid='" + marker.place.placeId + "'><p><a class='placeLink' data-saved='true' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a><span class='right'><a class='deletePlace' data-saved='true' data-placeid="+ marker.place.placeId + ">X</a></span></p>"); 
@@ -252,6 +331,7 @@ function CreatePlaceListing(marker){
         $("#places").append("<div><p><a class='placeLink' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a></p>");
     }
 }
+
 function AddMarkerToSavedPlaces(placeMarker){
     mySavedMarkers.push(placeMarker);
 }
@@ -269,7 +349,24 @@ function HandleNoGeolocation(errorFlag) {
     map.setCenter();
 }
 
+function ShowWaitLoader(){
+    var waitDialog = $('#loading');
+    var waitImage = $('#loading-image');
+    waitDialog.addClass('loading');
+    waitImage.addClass('loading-image');
+}
+
+function CloseWaitLoader(){
+    var waitDialog = $('#loading');
+    var waitImage = $('#loading-image');
+    waitDialog.removeClass('loading');
+    waitImage.removeClass('loading-image');
+
+}
+
 function AttemptGeolocation() {
+    ShowWaitLoader();
+
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(function (position) {
             var center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
@@ -291,6 +388,8 @@ function AttemptGeolocation() {
                 infowindow.open(map, marker);
             });
 
+            CloseWaitLoader();
+
         }, function () {
             HandleNoGeolocation(browserSupportFlag);
         });
@@ -298,6 +397,7 @@ function AttemptGeolocation() {
     else {
         console.log("geolocation is false");
         HandleNoGeolocation(browserSupportFlag);
+        CloseWaitLoader();
     }
 }
 
@@ -327,13 +427,12 @@ function GetPlaceDetails(marker) {
 
     service.getDetails(request, function (place, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
-            place.isSaved = IsAlreadySaved(place);
             OpenInfoWindow(place, marker);
         }
     });
 }
 
-function OpenInfoWindow(place, marker) {
+function OpenInfoWindow(place, marker, photo, rating, phone) {
     google.maps.event.addListener(marker, 'click', function () {
         if (infowindow) {
             infowindow.close();
@@ -348,75 +447,81 @@ function OpenInfoWindow(place, marker) {
     var phone = (place.formatted_phone_number == null) ? null : place.formatted_phone_number;
     var photo = (place.photos == null) ? null : place.photos[0].getUrl({ "maxWidth": 80, "maxHeight": 80 });
     var rating = (place.rating == null) ? null : place.rating;
-    var contentString = '<div class="detailWindow">' +
-                            '<div id="siteNotice">' +
-                            '</div>' +
-                            '<h3 id="firstHeading" class="firstHeading">' + place.name + '</h3>' +
-                                '<div id="bodyContent">' +
-                                    '<h5 class="address">' + place.formatted_address + '</h5>' +
-                                '</div>' +
-                        '</div>';
-
-    infowindow.setContent(contentString);
+    var notes = (place.notes == null) ? null : place.notes;
+    var category = (place.category == null) ? null : place.category;
+    
+    infowindow.setContent(placeInfoWindow(place.name, place.formatted_address, photo, rating, phone, isSaved, notes, category, place.placeid).html());
     infowindow.open(map, marker);
+        $('#savePlace').click(function(){        
+            infowindow.close();
+            var modalText = SavePlaceWindow(place.name);
+            modalText.dialog();
 
+            modalText.submit(function(event){
+                event.preventDefault();
+                var myNotes = document.getElementById("myNotes").value;
+                var categories =  [];
+                $("input[name='categories']:checked").each(function() {
+                  categories.push($(this).val());
+                });
+                place.categories = categories;
+                place.notes = myNotes;
+                place.isSaved = true;
+                arrayForPlace = [];
+                listOfCheckedBoxes = null;
+                myNotes = null;
+
+                SavePlace(place);
+                modalText.dialog('destroy').remove();
+            });
+        });
+    
+}
+
+var placeInfoWindow = function(placename, placeAddress, photo, rating, phone, isSaved, notes, category, placeid){
+   var bodyContent = $('<div id="bodyContent"> <h5 class="address">' + placeAddress + '</h5></div>');
     if (photo) {
-        $('#bodyContent').append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
+        bodyContent.append('<p class="images">' + '<img src=' + photo + ' alt="photo">' + '</p>');
     }
     if (rating) {
-        $('#bodyContent').append('<p class="rating">Rating: ' + rating + '</p>');
+        bodyContent.append('<p class="rating">Rating: ' + rating + '</p>');
     }
     if (phone) {
-        $('#bodyContent').append('<p class="phone">Phone: ' + phone + '</p>');
+        bodyContent.append('<p class="phone">Phone: ' + phone + '</p>');
     }
+
+    if (isSaved){
+        bodyContent.append('<p class="notes">My Notes: ' + notes + '</p>');
+        bodyContent.append('<p class="category">Categories: ' + category + '</p>');
+    }
+
     if (!isSaved) {
-        $('#bodyContent').append('<button id="savePlace">Save To My Map</button>');
-        
-        $('#savePlace').click(function(){
-        
-                infowindow.close();
-                var categoryList = CreateCategoryList();
-                var modalText = $('<form id="dialog" title="'+place.name+'">' +
-                                    '<div>' +
-                                        '<textarea id="myNotes" rows="3" name="notes" cols="27" placeholder="Save your notes here..."></textarea>' +
-                                    '</div>' +
-                                    categoryList.html() + '<input type="submit" value="Submit">' +
-                                '</form>');
-                modalText.dialog();
-
-                modalText.submit(function(event){
-                    event.preventDefault();
-                    var myNotes = document.getElementById("myNotes").value;
-                    var categories =  [];
-                    $("input[name='categories']:checked").each(function() {
-                      categories.push($(this).val());
-                    });
-                    place.categories = categories;
-                    place.notes = myNotes;
-                    place.isSaved = true;
-                    arrayForPlace = [];
-                    listOfCheckedBoxes = null;
-                    myNotes = null;
-
-                    SavePlace(place);
-                    modalText.dialog('destroy').remove();
-                });
-        });
+        bodyContent.append('<button id="savePlace" data-placeid="'+ placeid + '">Save To My Map</button>');
     }
+    return $('<div className="detailWindow"><div id="siteNotice"></div><h3 id="firstHeading" class="firstHeading">' + placename + 
+        '</h3>' + bodyContent.html() + '</div>');
+}
+
+var SavePlaceWindow = function(name){
+    var categoryList = CreateCategoryList();
+    return $('<form id="dialog" title="'+name+'">' +
+                                '<div>' +
+                                    '<textarea id="myNotes" rows="3" name="notes" cols="27" placeholder="Save your notes here..."></textarea>' +
+                                '</div>' +
+                                categoryList.html() + '<input type="submit" value="Submit">' +
+                            '</form>');
 }
 
 function SavePlace(place){
-
     DeleteMarkerByPlaceId(place);
-    
     var newPlaceId = place.place_id;
     var newNotes = place.notes;
     var newCategory = place.categories;
+    place.isSaved = true;
 
     plansitDb.AddPlace(myTripId, newPlaceId, newNotes, newCategory);
     var newMarker = CreateMarker(place);
     newMarker = AddMarkerToSavedPlaces(newMarker);
- 
 }
 
 function CreateCategoryList(){
@@ -429,8 +534,6 @@ function CreateCategoryList(){
         return listForHtml;
     };   
 }
-
-
 function Callback(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
         DisplayPlaces(results);
@@ -481,4 +584,12 @@ function getRequestParameter(name) {
     if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search.toLowerCase()))
         return decodeURIComponent(name[1]);
 }
-
+function GetMarkersFromSaved(places){
+    $.each(places, function(place){
+        mySavedMarkers.push({
+            placeid: place.placeId, 
+            notes: place.notes, 
+            categories: place.categories
+        });
+    });
+}
