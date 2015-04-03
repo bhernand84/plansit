@@ -316,16 +316,14 @@ function DeletePlace(savedMarker, savedPlaceId){
     
     $("[data-placeid='" + savedPlaceId + "']").remove();
             
-     var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
-            return e.placeid == savedPlaceId;
-        });
-
+   var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+        return e.placeid == savedPlaceId;
+    });
+    plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
     var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
     if(placeindex > -1){
         mySavedPlaces.splice(placeindex,1);
     }
-                 
-    plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
 }
 
 function RemoveItemFromSavedMarkersArray(indexOfRemovedItem){
