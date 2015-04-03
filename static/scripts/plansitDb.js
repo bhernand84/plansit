@@ -16,6 +16,7 @@ define(["jquery"], function($){
 						  },
 				  	url: "/place/add",
 				  	success: function(data){
+				  		return {};
 				  	}
 				});	
 			}
@@ -47,6 +48,7 @@ define(["jquery"], function($){
 					},
 					url: "/trip/add",
 					success: function(data){
+						return {};
 					}
 				});
 			}

@@ -20,7 +20,7 @@ require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitD
         var notes = $("input[name='notes']", this).val();
 
         var response = plansitDb.AddPlace(tripID, placeId, notes, categories);
-        if(response.error){
+        if(response != null && response.error){
         	if(!$(".validation", this).length >0){
 	        	$(this).prepend("<div class='validation'></div>");
 	        	$(".validation", this).html(response.error);
@@ -37,7 +37,7 @@ require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitD
         var departure = $("input[name='departure']", this).val();
         var triplength = $("input[name='length']", this).val();
         var response = plansitDb.AddTrip(name, description, departure, triplength);
-        if(response.error){
+        if(response!= null && response.error){
 	    	if(!$(".validation", this).length >0){
 	        	$(this).prepend("<div class='validation'></div>");
 	        	$(".validation", this).html(response.error);
