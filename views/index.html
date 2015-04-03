@@ -1,11 +1,12 @@
-
-
 <html>
 	<body>
-		<h1>plansit</h1>
-		<div>
-			Welcome back, {{.Email}} 
-			<div class="left">
+		<div class="plansitHeader">
+			<h1>plansit</h1>
+		</div>
+
+		<div style="background-color: red">
+			<h3>Welcome back, {{.Email}}</h3>
+			<div class="indexQuickAdd">
 				<a class="modalOpen" data-modalid="addPlace">quick add</a>
 			</div>
 		</div>
@@ -14,17 +15,22 @@
 			<h2 class="subHeader">Trips</h2>
 			<a class="modalOpen" data-modalid="addTrip">add a trip</a>
 
+			<div id="accordion">
 			{{range .Trips}}
-			<div>
+			
+				<h3 class="subHeader">{{.Name}}</h3>
 				<div>
-					<h3 class="subHeader"><a href="/mapper?tripid={{.Id}}">{{.Name}}</a></h3>
+					<a href="/mapper?tripid={{.Id}}">{{.Name}}</a>
 					<a class="removeTrip" data-id="{{.Id}}" href="">X</a>
+					<div>
+						<label>{{.Description}}</label> 
+						<label>{{.Length}} in {{.Departure}}</label>
+					</div>
 				</div>
-				<div>
-					<label>{{.Description}}</label> 
-					<label>{{.Length}} in {{.Departure}}</label>
-				</div>
+			
 			{{end}}
+			</div>
+			
 		<div class="modal" data-id="addTrip">
 			<h1>add a trip!</h1>
 			<form action="trip/add" method="Post" id="tripAdd">
@@ -75,7 +81,9 @@
 			</form>	
 		</div>
 	<script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
-    <link rel="stylesheet" href="/static/scripts/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" href="/static/scripts/jquery-ui/jquery-ui.css">
+	<link rel="stylesheet" href="/static/scripts/myStyles.css">
+
 	<style>
 		.subHeader{
 			display:inline;

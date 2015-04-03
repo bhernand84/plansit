@@ -70,6 +70,17 @@ function LoadTrip(trips){
 }
 
 function Initialize() {
+    $(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "content",
+            active: false
+        });
+    });
+    $('#savedPlaces').click(function(){
+        $('html, body').animate({scrollTop:$(document).height()}, 'slow');
+        return false;
+    });
     mapOptions = getMapOptions();
     map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
@@ -597,3 +608,8 @@ function GetMarkersFromSaved(places){
         });
     });
 }
+
+
+
+
+

@@ -17,22 +17,25 @@
             </div>
         </div>
     </div>
-        <h1><a href="/">plansit</a></h1>
-        <div class="tripHeader">
-            <h2 id="tripHeader"></h2>
-        </div>
+    <div class="plansitHeader">
+        <h1 id="plansitHeader"><a href="/">plansIt</a></h1>
+    </div>
+    <div class="tripHeader">
+        <h2 id="tripHeader"></h2>
+    </div>
     <input id="pac-input" class="controls" type="text" placeholder="Search Box"></input>
     <div id="mapperButtons">
         <input id="toggleSavedMarkers" class="myButton" onclick="ToggleSavedMarkers()" type=button value="Show Saved"></input><input onclick="ClearMarkers();" class="myButton" type=button value="Clear"><input id="geoLocate" class="myButton" onclick="AttemptGeolocation()" type=button value="Find Me!"></input>
     </div>
     <div id="map-canvas"></div>
 
-    <h2>Places</h2>
-    <div id="places">
-    </div>
-
-    <h2>Saved Places</h2>
-    <div id="savedPlaces">
+    <div id="accordion">
+        <h2>Saved Places</h2>
+        <div id="savedPlaces">
+        </div>
+        <h2>Places</h2>
+        <div id="places">
+        </div>
     </div>
 
 </body>
