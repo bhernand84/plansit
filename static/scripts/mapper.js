@@ -1,6 +1,6 @@
 var plansitDb;
 var placesFromDb = [];
-var mySavedMarkers = [];
+var mySavedMarkers = [];    
 var mySavedPlaces= [];
 var myTripId;
 
@@ -17,7 +17,41 @@ require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries
    AddPlaceDetailsEvents();
 });
 
+function LoadTrip(trips){
+if(trips){
+    if(trips.places){
+        mySavedPlaces = trips.places;
+    }
+    $("#tripHeader").html(trips.name);
+        LoadSavedPlaces();
+    }
+}
+
+function LoadSavedPlaces(){
+    if(mySavedPlaces.length != 0){
+        var bounds = new google.maps.LatLngBounds();
+        for(var i = 0, savedPlace; savedPlace = mySavedPlaces[i]; i++){
+            var service = new google.maps.places.PlacesService(map);
+            request = {
+                placeId: savedPlace.placeid
+            };
+
+            service.getDetails(request, function (place, status) {
+                if (status == google.maps.places.PlacesServiceStatus.OK) {
+                    place.isSaved = true;
+                    var newMarker = CreateMarker(place, true);
+                    bounds.extend(place.geometry.location);
+                    map.fitBounds(bounds);
+                }
+            });            
+        }
+        map.setCenter(bounds.getCenter());
+        ToggleSavedMarkers();
+    }  
+}
+
 var map;
+
 var mapOptions;
 var browserSupportFlag;
 var infowindow;
@@ -35,26 +69,21 @@ function LoadTrip(trips){
         }
 }
 
-function GetMarkersFromSaved(places){
-    $.each(places, function(place){
-        mySavedMarkers.push({
-            placeid: place.placeId, 
-            notes: place.notes, 
-            categories: place.categories,
-            isSaved: true
-        });
-    });
-}
-
 function Initialize() {
-    mapOptions = {
+    mapOptions = getMapOptions();
+    map = new google.maps.Map(document.getElementById('map-canvas'),
+        mapOptions);
+    addSearchBoxToMap();
+    AddPlaceResultListeners();
+}
+function getMapOptions () {
+    return {
         zoom: 14,
         center: new google.maps.LatLng(50.9500, -70.1667),
         mapTypeId: google.maps.MapTypeId.ROADMAP
     };
-    map = new google.maps.Map(document.getElementById('map-canvas'),
-        mapOptions);
-
+}
+function addSearchBoxToMap(){
     var input = (document.getElementById('pac-input'));
     var searchBox = new google.maps.places.SearchBox((input));
     map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
@@ -63,24 +92,73 @@ function Initialize() {
     place = autocomplete.getPlace();
     autocomplete.bindTo('bounds', map);
 
-    setTimeout(AddMapListeners(input, searchBox), 1);  
-    map.setZoom(15);
-
-    LoadSavedPlaces(placesFromDb);
+    AddMapListeners(input, searchBox);
 }
+function AddPlaceResultListeners(){
+    $("#places, #savedPlaces").on("click", ".placeLink", function(e){
+        e.preventDefault();
+        var savedPlaceId = $(this).attr("data-placeid");
+        var savedPlace = $(this).attr("data-saved") == 'true';
+        if(savedPlace){
+            var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                return e.place.placeId == savedPlaceId;
+            });
+            GetPlaceDetails(savedMarker[0]);
+        }   
+        else {
+            var mapMarker = $.grep(markers, function(e){ 
+                return e.place.placeId == savedPlaceId;
 
+            });
+            GetPlaceDetails(mapMarker[0]);
+        }
+    });
+    $("#places, #savedPlaces").on("click", ".deletePlace", function(e){
+        e.preventDefault();
+        if(confirm('you sure girl?')){
+            var savedPlaceId = $(this).attr("data-placeid");
+            var savedPlace = $(this).attr("data-saved") == 'true';
+            if(savedPlace){
+                var savedMarker = $.grep(mySavedMarkers, function(e){ 
+                    return e.place.placeId == savedPlaceId;
+                });
+                var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
+                mySavedMarkers[savedIndex].setMap(null);
+
+                var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+                    return e.placeid == savedPlaceId;
+                });
+                $("[data-placeid='" + savedPlaceId + "']").remove();
+
+                   var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+
+                    return e.placeid == savedPlaceId;
+                });
+                var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
+                if(placeindex > -1){
+                    delete mySavedMarkers[placeindex];
+                }
+                plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
+            }
+     }
+    });
+ }  
 function AddMapListeners(input, searchBox, types){
     toggleSavedPlaces = true;
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
-
-        if (places.length == 0) {
+        DisplayPlaces(places);
+    });
+    google.maps.event.addListener(map, 'bounds_changed', function() {
+        var bounds = map.getBounds();
+        searchBox.setBounds(bounds);
+    });
+}
+function DisplayPlaces(places){
+     if (places.length == 0) {
             return;
         }
-        for (var i = 0, marker; marker = markers[i]; i++) {
-            marker.setMap(null);
-        }
-
+        ClearPlaceListings();
         ClearMarkers();
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0, place; place = places[i]; i++) {
@@ -88,15 +166,10 @@ function AddMapListeners(input, searchBox, types){
             bounds.extend(place.geometry.location);
         }
         map.fitBounds(bounds);
-    });
-    // Bias the SearchBox results towards places that are within the bounds of the
-    // current map's viewport.
-    google.maps.event.addListener(map, 'bounds_changed', function() {
-        var bounds = map.getBounds();
-        searchBox.setBounds(bounds);
-    });
 }
-
+function ClearPlaceListings(){
+    $("#places div").remove()
+}
 function LoadSavedPlaces(){
     if(mySavedPlaces.length != 0){
         var bounds = new google.maps.LatLngBounds();
@@ -108,7 +181,8 @@ function LoadSavedPlaces(){
 
             service.getDetails(request, function (place, status) {
                 if (status == google.maps.places.PlacesServiceStatus.OK) {
-                    var newMarker = CreateMarker(place, true);
+                    place.isSaved = true;
+                    var newMarker = CreateMarker(place);
                     bounds.extend(place.geometry.location);
                     map.fitBounds(bounds);
                 }
@@ -118,39 +192,21 @@ function LoadSavedPlaces(){
         ToggleSavedMarkers();        
     }  
 }
-
-function IsAlreadySaved(place){
-   if(mySavedMarkers.length==0){
-        return false;
-    }
-    else {
-        var savedPlaceIDs = [];
-        for(var i = 0; i < mySavedMarkers.length; i++){
-            savedPlaceIDs.push(mySavedMarkers[i].place.placeId);
+function ClearMarkers() {
+    for (var i = 0; i < markers.length; i++ ) {
+        if(markers[i].isSaved==false){
+        markers[i].setMap(null);
         }
-        if(savedPlaceIDs.indexOf(place.place_id)!= -1){
-            return true;
-        }
-        else{
-            return false;
-            }
     }
+        markers.length = 0;
 }
+function CreateMarker(placeResult) {
+    var image =  getMarkerImage(placeResult.icon);
 
-function CreateMarker(placeResult, isSavedBool) {
+    isSavedBool = IsAlreadySaved(placeResult);
+
     var placeLoc = placeResult.geometry.location;
-    var image = {
-            url: placeResult.icon,
-            size: new google.maps.Size(45, 45),
-            origin: new google.maps.Point(0, 0),
-            anchor: new google.maps.Point(17, 34),
-            scaledSize: new google.maps.Size(25, 25)
-        };
-    
 
-    if(isSavedBool == undefined){
-        isSavedBool = IsAlreadySaved(placeResult);
-    }
     var marker = new google.maps.Marker({
         map: map,
         icon: image,
@@ -167,7 +223,37 @@ function CreateMarker(placeResult, isSavedBool) {
     google.maps.event.addListener(marker, 'click', function () {
         GetPlaceDetails(marker);
     });
+
     return marker;
+}
+
+function IsAlreadySaved(place){
+   if(place.isSaved){
+        return true;
+   }
+   if(mySavedMarkers.length==0){
+        return false;
+    }
+    else {
+        for(var i = 0, savedMarker= mySavedMarkers[i]; i < mySavedMarkers.length; i++){
+            if(savedMarker.place.place_id = place.place_id){
+                return true;
+            }
+        }  
+            
+        return false;
+            
+    }
+}
+
+function getMarkerImage(icon){
+    return {
+            url: icon,
+            size: new google.maps.Size(45, 45),
+            origin: new google.maps.Point(0, 0),
+            anchor: new google.maps.Point(17, 34),
+            scaledSize: new google.maps.Size(25, 25)
+        };
 }
 function AddPlaceDetailsEvents()
 {
@@ -206,31 +292,26 @@ function AddPlaceDetailsEvents()
 
 function DeletePlace(savedMarker, savedPlaceId){
     var savedIndex = mySavedMarkers.indexOf(savedMarker[0]);
-                mySavedMarkers = RefreshSavedMarkersArray(savedIndex);
-                console.log(mySavedMarkers);
-                
-                var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
-                    return e.placeid == savedPlaceId;
-                });
-                $("[data-placeid='" + savedPlaceId + "']").remove();
+    RemoveItemFromSavedMarkersArray(savedIndex);
+    
+    $("[data-placeid='" + savedPlaceId + "']").remove();
 
-                   var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+   var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
+        return e.placeid == savedPlaceId;
+    });
+    plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
 
-                    return e.placeid == savedPlaceId;
-                });
-                var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
-                if(placeindex > -1){
-                    mySavedMarkers.splice(placeindex,1);
-                    console.log(mySavedMarkers);
-                }
-                plansitDb.RemovePlace(myTripId, savedPlaceDB[0].id);
+    var placeindex = mySavedPlaces.indexOf(savedPlaceDB[0]);
+    if(placeindex > -1){
+        mySavedPlaces.splice(placeindex,1);
+    }
 }
 
-function RefreshSavedMarkersArray(indexOfRemovedItem){
+function RemoveItemFromSavedMarkersArray(indexOfRemovedItem){
         mySavedMarkers[indexOfRemovedItem].setMap(null);
         mySavedMarkers.splice(indexOfRemovedItem, 1);
-        return mySavedMarkers;
 }
+
 
 function AddMarkerToCollection(marker){
     if(marker.isSaved){
@@ -346,13 +427,12 @@ function GetPlaceDetails(marker) {
 
     service.getDetails(request, function (place, status) {
         if (status == google.maps.places.PlacesServiceStatus.OK) {
-            place.isSaved = IsAlreadySaved(place);
             OpenInfoWindow(place, marker);
         }
     });
 }
 
-function OpenInfoWindow(place, marker, photo, rating, phone, isSaved) {
+function OpenInfoWindow(place, marker, photo, rating, phone) {
     google.maps.event.addListener(marker, 'click', function () {
         if (infowindow) {
             infowindow.close();
@@ -434,7 +514,6 @@ var SavePlaceWindow = function(name){
 
 function SavePlace(place){
     DeleteMarkerByPlaceId(place);
-    
     var newPlaceId = place.place_id;
     var newNotes = place.notes;
     var newCategory = place.categories;
@@ -455,26 +534,9 @@ function CreateCategoryList(){
         return listForHtml;
     };   
 }
-
-function ClearMarkers() {
-    for (var i = 0; i < markers.length; i++ ) {
-        if(markers[i].isSaved==false){
-
-            markers[i].setMap(null);
-        }
-    }
-        markers.length = 0;
-}
-
 function Callback(results, status) {
     if (status == google.maps.places.PlacesServiceStatus.OK) {
-        var bounds = new google.maps.LatLngBounds();
-        for (var i = 0; i < results.length; ++i) {
-            bounds.extend(results[i].geometry.location);
-            var place = results[i];
-            CreateMarker(place);
-        }
-        map.fitBounds(bounds);
+        DisplayPlaces(results);
     }
 }
 
@@ -522,4 +584,12 @@ function getRequestParameter(name) {
     if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search.toLowerCase()))
         return decodeURIComponent(name[1]);
 }
-
+function GetMarkersFromSaved(places){
+    $.each(places, function(place){
+        mySavedMarkers.push({
+            placeid: place.placeId, 
+            notes: place.notes, 
+            categories: place.categories
+        });
+    });
+}
