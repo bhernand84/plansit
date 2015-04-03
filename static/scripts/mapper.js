@@ -67,10 +67,13 @@ function Initialize() {
     map.setZoom(15);
 
     LoadSavedPlaces(placesFromDb);
+
 }
 
 function AddMapListeners(input, searchBox, types){
     toggleSavedPlaces = true;
+    $('#pac-input').removeClass('hidden');
+    
     google.maps.event.addListener(searchBox, 'places_changed', function() {
         var places = searchBox.getPlaces();
 
