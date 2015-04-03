@@ -45,10 +45,6 @@ function Initialize() {
             active: false
         });
     });
-    $('#savedPlaces').click(function(){
-        $('html, body').animate({scrollTop:$(document).height()}, 'slow');
-        return false;
-    });
     mapOptions = getMapOptions();
     map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);

@@ -1,6 +1,13 @@
 
 require(["jquery", "jquery-ui/jquery-ui", "plansitDb"], function($, ui, plansitDb){
 	plansitDb.GetUserData();
+	$(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "content",
+            active: false
+        });
+    });
 	$("#placeAdd").submit(function(event){
 		event.preventDefault();
 		var categories =  [];
