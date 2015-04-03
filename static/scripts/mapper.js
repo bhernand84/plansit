@@ -38,6 +38,13 @@ function LoadTrip(trips){
 }
 
 function Initialize() {
+    $(function() {
+        $( "#accordion" ).accordion({
+            collapsible: true,
+            heightStyle: "content",
+            active: false
+        });
+    });
     mapOptions = getMapOptions();
     map = new google.maps.Map(document.getElementById('map-canvas'),
         mapOptions);
@@ -481,3 +488,8 @@ function GetMarkersFromSaved(places){
         });
     });
 }
+
+
+
+
+

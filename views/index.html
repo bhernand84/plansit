@@ -1,30 +1,36 @@
-
-
 <html>
 	<body>
-		<h1>plansit</h1>
-		<div>
-			Welcome back, {{.Email}} 
-			<div class="left">
-				<a class="modalOpen" data-modalid="addPlace">quick add</a>
-			</div>
+		<div class="plansitHeader">
+			<h1>plansit</h1>
 		</div>
 
 		<div>
-			<h2 class="subHeader">Trips</h2>
-			<a class="modalOpen" data-modalid="addTrip">add a trip</a>
+			<h3 id="welcomeUser">Welcome back, {{.Email}}</h3>
+		</div>
 
+		<div class="indexTripsSection">
+			<div class="tripHeader">
+				<h2 id="tripsLabel" class="subHeader">Trips</h2>
+			</div>
+			<div id="accordion">
 			{{range .Trips}}
-			<div>
+				<h2>{{.Name}}</h3>
 				<div>
-					<h3 class="subHeader"><a href="/mapper?tripid={{.Id}}">{{.Name}}</a></h3>
+					<a href="/mapper?tripid={{.Id}}">{{.Name}}</a>
 					<a class="removeTrip" data-id="{{.Id}}" href="">X</a>
-				</div>
-				<div>
-					<label>{{.Description}}</label> 
-					<label>{{.Length}} in {{.Departure}}</label>
+					<div>
+						<label>{{.Description}}</label> 
+						<label>{{.Length}} in {{.Departure}}</label>
+					</div>
 				</div>
 			{{end}}
+			</div>
+			<div id="indexButtons">
+				<input id="addTrip" class="myButton modalOpen" data-modalid="addTrip" type=button value="+Trip"></input>
+				<input id="addPlace" class="myButton modalOpen" data-modalid="addPlace" type=button value="+Place"></input>
+			</div>
+		</div>
+
 		<div class="modal" data-id="addTrip">
 			<h1>add a trip!</h1>
 			<form action="trip/add" method="Post" id="tripAdd">
@@ -75,7 +81,9 @@
 			</form>	
 		</div>
 	<script data-main="/static/scripts/main" src="/static/scripts/require.js"></script>
-    <link rel="stylesheet" href="/static/scripts/jquery-ui/jquery-ui.min.css">
+    <link rel="stylesheet" href="/static/scripts/jquery-ui/jquery-ui.css">
+	<link rel="stylesheet" href="/static/scripts/myStyles.css">
+
 	<style>
 		.subHeader{
 			display:inline;

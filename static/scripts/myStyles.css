@@ -8,7 +8,36 @@
 }
 html,body{
     height: 100%;
+}
+html {
+    background-image: url("/static/images/roadtripbackgroundfaded.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
     background-color: #EFFBFB;
+}
+body{
+    width: 100%;
+}
+.indexTripsSection{
+    width: 50%;
+    margin: auto;
+}
+.plansitHeader{
+    text-align: center;
+    position: center;
+}
+#accordion h2, #accordionIndex h2{
+    background:-webkit-gradient(linear, left top, left bottom, color-stop(0.05, #51b06a), color-stop(1, #449615));
+    background:-moz-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:-webkit-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:-o-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:-ms-linear-gradient(top, #51b06a 5%, #449615 100%);
+    background:linear-gradient(to bottom, #51b06a 5%, #449615 100%);
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#51b06a', endColorstr='#449615',GradientType=0);
+    background-color:#51b06a;
+    color:#ffffff;
+    text-shadow:0px 1px 0px #0a1a08;
+    margin-bottom: 5px;
 }
 .myButton {
     -moz-box-shadow: 0px 10px 14px -7px #60a34e;
@@ -57,13 +86,14 @@ html,body{
     display: none;
 }
 #map-canvas {
-    height: 500px;
+    height: 50%;
     width: 95%;
     margin: auto;
     padding: 0px;
     border-radius: 15px;
     position: center;
     border: solid 2px #008A2E;
+    margin-bottom: 3%;
 }
 #pac-input {
     background-color: #fff;
@@ -137,6 +167,13 @@ span.right{
     position: center;
     margin: auto;
 }
+#indexButtons {
+    text-align: center;
+    width: 100%;
+    display: inline-block;
+    position: center;
+    margin: auto;
+}
 .tripHeader {
     display: inline-block;
     color: white;
@@ -151,17 +188,27 @@ span.right{
     line-height: 100%;
     margin-bottom: 3%;
 }
-.tripHeader h2 {
+.tripHeader h2, #indexTrips h2{
     line-height:0;
     height:100%;
     width:100%;
     margin: 0px;
     text-shadow: 2px 2px 3px #0B6121;
 }
-.tripHeader h2:before {
+.tripHeader h2:before, #indexTrips h2:before{
     content:"";
     display:block;
     height:50%;
     width:100%;
+}
+.indexQuickAdd{
+    text-align: center;
+    position: center;
+    text-decoration: underline;
+}
+#welcomeUser{
+    text-align: center;
+    position: center;
+
 }
 
