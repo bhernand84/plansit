@@ -95,24 +95,31 @@ function addSearchBoxToMap(){
 
     AddMapListeners(input, searchBox);
 }
+function getSavedMarkerbyPlaceId(placeId, markersToSearch){
+    for( var i=0,marker; i<markersToSearch.length; i++){ 
+        marker  = markersToSearch[i];
+        if (marker.place.placeId == placeId)
+        {
+            return marker;
+        }
+    };
+}
+function getMarkerByPlaceId(placeId){
+
+}
 function AddPlaceResultListeners(){
     $("#places, #savedPlaces").on("click", ".placeLink", function(e){
         e.preventDefault();
         var savedPlaceId = $(this).attr("data-placeid");
         var savedPlace = $(this).attr("data-saved") == 'true';
+        var marker;
         if(savedPlace){
-            var savedMarker = $.grep(mySavedMarkers, function(e){ 
-                return e.place.placeId == savedPlaceId;
-            });
-            GetPlaceDetails(savedMarker[0]);
+            marker = getSavedMarkerbyPlaceId(savedPlaceId, mySavedMarkers);
         }   
         else {
-            var mapMarker = $.grep(markers, function(e){ 
-                return e.place.placeId == savedPlaceId;
-
-            });
-            GetPlaceDetails(mapMarker[0]);
+             marker = getSavedMarkerbyPlaceId(savedPlaceId, markers);
         }
+        GetPlaceDetails(marker);
     });
     $("#places, #savedPlaces").on("click", ".deletePlace", function(e){
         e.preventDefault();
@@ -165,7 +172,8 @@ function DisplayPlaces(places){
         ClearMarkers();
         var bounds = new google.maps.LatLngBounds();
         for (var i = 0, place; place = places[i]; i++) {
-            CreateMarker(place);            
+            var marker = CreateMarker(place);
+            AddMarkerToCollection(marker, markers)            
             bounds.extend(place.geometry.location);
         }
         map.fitBounds(bounds);
@@ -237,8 +245,9 @@ function IsAlreadySaved(place){
         return false;
     }
     else {
-        for(var i = 0, savedMarker= mySavedMarkers[i]; i < mySavedMarkers.length; i++){
-            if(savedMarker.place.place_id == place.place_id){
+        for(var i = 0, savedMarker; i < mySavedMarkers.length; i++){
+            savedMarker = mySavedMarkers[i];
+            if(savedMarker.place.placeId == place.place_id){
                 return true;
             }
         }   
@@ -251,9 +260,12 @@ function AddMarkerToCollection(marker){
         AddMarkerToSavedPlaces(marker);
     } 
     else {
-        markers.push(marker);
+        AddMarkerToPlaces(marker);
     }
     CreatePlaceListing(marker);
+}
+function AddMarkerToPlaces(marker){
+        markers.push(marker);
 }
 function AddMarkerToSavedPlaces(placeMarker){
     mySavedMarkers.push(placeMarker);
@@ -314,7 +326,15 @@ function DeletePlace(savedMarker, savedPlaceId){
     RemoveItemFromSavedMarkersArray(savedIndex);
     
     $("[data-placeid='" + savedPlaceId + "']").remove();
-            
+    RemoveSavedPlaceFromDatabase(savedPlaceId);
+   
+
+function RemoveItemFromSavedMarkersArray(indexOfRemovedItem){
+        mySavedMarkers[indexOfRemovedItem].setMap(null);
+        mySavedMarkers.splice(indexOfRemovedItem, 1);
+}
+function RemoveSavedPlaceFromDatabase(savedPlaceId){
+
    var savedPlaceDB = $.grep(mySavedPlaces, function(e){ 
         return e.placeid == savedPlaceId;
     });
@@ -324,78 +344,7 @@ function DeletePlace(savedMarker, savedPlaceId){
         mySavedPlaces.splice(placeindex,1);
     }
 }
-
-function RemoveItemFromSavedMarkersArray(indexOfRemovedItem){
-        mySavedMarkers[indexOfRemovedItem].setMap(null);
-        mySavedMarkers.splice(indexOfRemovedItem, 1);
 }
-
-function HandleNoGeolocation(errorFlag) {
-    if (errorFlag == true) {
-        alert("Geolocation service failed.");
-        map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
-    } else {
-        alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
-        map = new google.maps.Map(document.getElementById('map-canvas'),
-            mapOptions);
-    }
-    map.setCenter();
-}
-
-
-
-function AttemptGeolocation() {
-    ShowWaitLoader();
-
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function (position) {
-            var center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
-            map.setCenter(center);
-
-            var windowContent = '<div>Current Location</div>';
-
-            var marker = new google.maps.Marker({
-                map: map,
-                position: center,
-                title: 'Current Location',
-            });
-
-            var infowindow = new google.maps.InfoWindow({
-                content: windowContent
-            });
-
-            google.maps.event.addListener(marker, 'click', function () {
-                infowindow.open(map, marker);
-            });
-
-            CloseWaitLoader();
-
-        }, function () {
-            HandleNoGeolocation(browserSupportFlag);
-        });
-    }
-    else {
-        console.log("geolocation is false");
-        HandleNoGeolocation(browserSupportFlag);
-        CloseWaitLoader();
-    }
-}
-
-function SearchNearby() {
-    ClearMarkers();
-    var myMap = map.getCenter();
-
-    request = {
-        location: myMap,
-        radius: 500,
-        types: ['bar']
-    };
-
-    var service = new google.maps.places.PlacesService(map);
-    service.nearbySearch(request, Callback)
-}
-
 function GetPlaceDetails(marker) {
     if (infowindow) {
         infowindow.close();
@@ -551,18 +500,58 @@ function DeleteMarkerByPlaceId(place){
         }
     }
 }
+function HandleNoGeolocation(errorFlag) {
+    if (errorFlag == true) {
+        alert("Geolocation service failed.");
+        map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+    } else {
+        alert("Your browser doesn't support geolocation. We've placed you in Siberia.");
+        map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+    }
+    map.setCenter();
+}
 
-function checkRefParam() {
-        var paramValue = getRequestParameter('ref');
-        if (paramValue) {
-            writeCookie('ref', paramValue);
+
+
+function AttemptGeolocation() {
+    ShowWaitLoader();
+
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function (position) {
+            var center = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+            map.setCenter(center);
+
+            var windowContent = '<div>Current Location</div>';
+
+            var marker = new google.maps.Marker({
+                map: map,
+                position: center,
+                title: 'Current Location',
+            });
+
+            var infowindow = new google.maps.InfoWindow({
+                content: windowContent
+            });
+
+            google.maps.event.addListener(marker, 'click', function () {
+                infowindow.open(map, marker);
+            });
+
+            CloseWaitLoader();
+
+        }, function () {
+            HandleNoGeolocation(browserSupportFlag);
+        });
+    }
+    else {
+        console.log("geolocation is false");
+        HandleNoGeolocation(browserSupportFlag);
+        CloseWaitLoader();
     }
 }
-function getRequestParameter(name) {
-    name = name.toLowerCase();
-    if (name = (new RegExp('[?&]' + encodeURIComponent(name) + '=([^&]*)')).exec(location.search.toLowerCase()))
-        return decodeURIComponent(name[1]);
-}
+
 function GetMarkersFromSaved(places){
     $.each(places, function(place){
         mySavedMarkers.push({
