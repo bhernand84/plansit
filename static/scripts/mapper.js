@@ -6,7 +6,8 @@ var myTripId;
 
 require(['async!https://maps.googleapis.com/maps/api/js?signed_in=true&libraries=places',
    "jquery-ui/jquery-ui",
-   "plansitDb"
+   "plansitDb",
+   "loaderUtil"
    ], function(maps, ui, plansitDB){
    Initialize();
    plansitDb = plansitDB;
@@ -239,10 +240,29 @@ function IsAlreadySaved(place){
             if(savedMarker.place.place_id = place.place_id){
                 return true;
             }
-        }  
-            
-        return false;
-            
+        }   
+        return false; 
+    }
+}
+
+function AddMarkerToCollection(marker){
+    if(marker.isSaved){
+        AddMarkerToSavedPlaces(marker);
+    } 
+    else {
+        markers.push(marker);
+    }
+    CreatePlaceListing(marker);
+}
+function AddMarkerToSavedPlaces(placeMarker){
+    mySavedMarkers.push(placeMarker);
+}
+function CreatePlaceListing(marker){
+    if(marker.isSaved){
+        $("#savedPlaces").append("<div data-placeid='" + marker.place.placeId + "'><p><a class='placeLink' data-saved='true' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a><span class='right'><a class='deletePlace' data-saved='true' data-placeid="+ marker.place.placeId + ">X</a></span></p>"); 
+    }
+    else{
+        $("#places").append("<div><p><a class='placeLink' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a></p>");
     }
 }
 
@@ -275,7 +295,6 @@ function AddPlaceDetailsEvents()
             GetPlaceDetails(mapMarker[0]);
         }
     });
-
        
     $("#savedPlaces, #places").on("click", ".deletePlace", function(e){
             e.preventDefault();
@@ -312,30 +331,6 @@ function RemoveItemFromSavedMarkersArray(indexOfRemovedItem){
         mySavedMarkers.splice(indexOfRemovedItem, 1);
 }
 
-
-function AddMarkerToCollection(marker){
-    if(marker.isSaved){
-        AddMarkerToSavedPlaces(marker);
-    } 
-    else {
-        markers.push(marker);
-    }
-    CreatePlaceListing(marker);
-}
-
-function CreatePlaceListing(marker){
-    if(marker.isSaved){
-        $("#savedPlaces").append("<div data-placeid='" + marker.place.placeId + "'><p><a class='placeLink' data-saved='true' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a><span class='right'><a class='deletePlace' data-saved='true' data-placeid="+ marker.place.placeId + ">X</a></span></p>"); 
-    }
-    else{
-        $("#places").append("<div><p><a class='placeLink' data-placeid="+ marker.place.placeId + "> " + marker.title + "</a></p>");
-    }
-}
-
-function AddMarkerToSavedPlaces(placeMarker){
-    mySavedMarkers.push(placeMarker);
-}
-
 function HandleNoGeolocation(errorFlag) {
     if (errorFlag == true) {
         alert("Geolocation service failed.");
@@ -349,20 +344,7 @@ function HandleNoGeolocation(errorFlag) {
     map.setCenter();
 }
 
-function ShowWaitLoader(){
-    var waitDialog = $('#loading');
-    var waitImage = $('#loading-image');
-    waitDialog.addClass('loading');
-    waitImage.addClass('loading-image');
-}
 
-function CloseWaitLoader(){
-    var waitDialog = $('#loading');
-    var waitImage = $('#loading-image');
-    waitDialog.removeClass('loading');
-    waitImage.removeClass('loading-image');
-
-}
 
 function AttemptGeolocation() {
     ShowWaitLoader();
