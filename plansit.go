@@ -31,15 +31,12 @@ func init(){
 } 
 
 func root(w http.ResponseWriter, r *http.Request){
-	checkAuth(w,r)
-	models.Init(appengine.NewContext(r))
-	myUser := models.CurrentUser
+	myUser := models.Init(appengine.NewContext(r))
 
 	indexTemplate.Execute(w, myUser)
 }
 
 func mapper( w http.ResponseWriter, r *http.Request){
-	checkAuth(w,r)
 	mapperTemplate.Execute(w, "")
 }
 
@@ -50,49 +47,43 @@ func addPlace(w http.ResponseWriter, r * http.Request){
  	categoriesArr := r.Form["categories[]"]
  	intTripId, error := strconv.Atoi(tripid)
  	if error == nil{
-	 	models.Init(appengine.NewContext(r))
-	 	models.AddPlace(intTripId, placeid,notes, categoriesArr)	
+	 	CurrentUser := models.Init(appengine.NewContext(r))
+	 	models.AddPlace(CurrentUser, intTripId, placeid,notes, categoriesArr)	
 	}
 }	
 func removePlace(w http.ResponseWriter, r * http.Request){
 	tripid, err := strconv.Atoi(r.FormValue("tripid"))
 	placeid, error := strconv.Atoi(r.FormValue("placeid"))
 	if err == nil && error == nil{
-		models.Init(appengine.NewContext(r))
-		models.RemovePlace(tripid, placeid)
+		CurrentUser := models.Init(appengine.NewContext(r))
+		models.RemovePlace(CurrentUser, tripid, placeid)
 	}
 
 }
 func getTrip(w http.ResponseWriter, r *http.Request){
 	tripid, err := strconv.Atoi(r.FormValue("tripid"))
 	if err == nil {
-		models.Init(appengine.NewContext(r))
-		trip := models.GetTrip(tripid)
+		CurrentUser := models.Init(appengine.NewContext(r))
+		trip := models.GetTrip(CurrentUser, tripid)
 		json.NewEncoder(w).Encode(trip)
 	}
 }
 func getUser(w http.ResponseWriter, r *http.Request){
-		models.Init(appengine.NewContext(r))
-		user := models.CurrentUser
-		json.NewEncoder(w).Encode(user)
+		CurrentUser := models.Init(appengine.NewContext(r))
+		json.NewEncoder(w).Encode(CurrentUser)
 }
 func addTrip(w http.ResponseWriter, r * http.Request){
  	name, description, departure, length := r.FormValue("name"), r.FormValue("description") ,
  	r.FormValue("departure"), r.FormValue("length") 
- 	models.Init(appengine.NewContext(r))
- 	models.AddTrip(name, description, departure, length)	
+ 	CurrentUser := models.Init(appengine.NewContext(r))
+ 	models.AddTrip(CurrentUser,name, description, departure, length)	
 }
 func removeTrip(w http.ResponseWriter, r *http.Request){
 	tripid, err:= strconv.Atoi(r.FormValue("tripid"))
 	if err ==nil{
-		models.Init(appengine.NewContext(r))
-		models.RemoveTrip(tripid)
+		CurrentUser := models.Init(appengine.NewContext(r))
+		models.RemoveTrip(CurrentUser,tripid)
 	}
-}
-
-func checkAuth(w http.ResponseWriter, r *http.Request){ 
-	c:= appengine.NewContext(r)
-	models.Init(c)
 }
 
 

@@ -10,48 +10,48 @@ import(
 	"strconv"
 )
 
-var CurrentUser *PlansitUser
 var C appengine.Context
 
-func Init(c appengine.Context){
+func Init(c appengine.Context) *PlansitUser{
 	C=c
 	u:= user.Current(C)
-    GetUser(u.ID)
+    CurrentUser := GetUser(u.ID)
     if CurrentUser == nil{
     	CurrentUser = create(u.ID, u.Email, u.Email)
-    }   
+    }
+    return CurrentUser   
 }
 func create(userid string, name string, email string) *PlansitUser{
-	CurrentUser = &PlansitUser{userid, name, email, nil}
-	save()
+	CurrentUser := &PlansitUser{userid, name, email, nil}
+	save(CurrentUser)
 	return CurrentUser
 }
-func GetUser(userid string){
-	load(userid)
+func GetUser(userid string) *PlansitUser{
+	return load(userid)
 }
 
-func AddTrip(name string, desc string, departure string, length string){
+func AddTrip(CurrentUser *PlansitUser, name string, desc string, departure string, length string){
 	id := len(CurrentUser.Trips) +1;
 	myTrip := Trip{id, name, time.Now(), desc, departure, length, nil}
 	CurrentUser.Trips = append(CurrentUser.Trips, myTrip)
-	save()
+	save(CurrentUser)
 }
-func RemoveTrip(id int){
-	tripIndex := getIndexOfTrip(id)
+func RemoveTrip(CurrentUser *PlansitUser, id int){
+	tripIndex := getIndexOfTrip(CurrentUser, id)
 	if tripIndex == -1{
 		return
 	}
 	CurrentUser.Trips = append(CurrentUser.Trips[:tripIndex], CurrentUser.Trips[tripIndex +1:]...)
-	save()
+	save(CurrentUser)
 }
-func GetTrip(id int) *Trip{
-	tripIndex := getIndexOfTrip(id)
+func GetTrip(CurrentUser *PlansitUser, id int) *Trip{
+	tripIndex := getIndexOfTrip(CurrentUser, id)
 	if tripIndex == -1 { 
 		return nil
 	}
 	return &CurrentUser.Trips[tripIndex]
 }
-func getIndexOfTrip(id int) int{
+func getIndexOfTrip(CurrentUser *PlansitUser, id int) int{
 	for index, trip := range CurrentUser.Trips{
 		if trip.Id == id {
 			return index
@@ -60,28 +60,28 @@ func getIndexOfTrip(id int) int{
 	return -1
 }
 
-func AddPlace(tripid int, placeId string, notes string, categories []string){
-	trip := GetTrip(tripid)
+func AddPlace(CurrentUser *PlansitUser, tripid int, placeId string, notes string, categories []string){
+	trip := GetTrip(CurrentUser,tripid)
 	if trip !=nil{
 		id := len(trip.Places) +1
 		place := Place{id, placeId,notes, categories}
 		trip.Places = append(trip.Places, place)
-		save()
+		save(CurrentUser)
 	}
 }
-func GetPlaces(tripID int) []Place {
-	return GetTrip(tripID).Places
+func GetPlaces(CurrentUser *PlansitUser, tripID int) []Place {
+	return GetTrip(CurrentUser, tripID).Places
 }
 
-func RemovePlace(tripId int, placeid int){
-	trip := GetTrip(tripId)
+func RemovePlace(CurrentUser *PlansitUser, tripId int, placeid int){
+	trip := GetTrip(CurrentUser,tripId)
 	if trip != nil {
 		placeIndex := getIndexOfPlace(placeid, trip)
 		if placeIndex == -1 {
 			return
 		}
 		trip.Places = append(trip.Places[:placeIndex], trip.Places[placeIndex +1:]...)
-		save()
+		save(CurrentUser)
 	}
 
 }
@@ -93,7 +93,7 @@ func getIndexOfPlace(id int, trip *Trip) int{
 	}
 	return -1
 }
-func load (userid string) { 
+func load (userid string) *PlansitUser { 
 	var user DBCommit		
 	error := datastore.Get(C, userKey(C, userid), &user)
 
@@ -103,9 +103,9 @@ func load (userid string) {
 		err := proto.Unmarshal(data, protoUser)
 		if err != nil {
 			C.Infof("unmarshaling error: ", err)
-			return
+			return nil
 		}
-		CurrentUser = &PlansitUser{protoUser.GetGoogleId(), protoUser.GetName(), protoUser.GetEmail(), nil}
+		CurrentUser := &PlansitUser{protoUser.GetGoogleId(), protoUser.GetName(), protoUser.GetEmail(), nil}
 		for _, trip := range protoUser.Trips {
 			tripid, err := strconv.Atoi(trip.GetId())
 			tripcreated, error:=  time.Parse(time.RFC3339, trip.GetDateCreated())
@@ -120,12 +120,15 @@ func load (userid string) {
 			}
 			CurrentUser.Trips = append(CurrentUser.Trips, plansitTrip)
 			}
-		}
-	}
 		
+	}
+		return CurrentUser
+
+}
+	return nil
 }
 
-func save(){
+func save(CurrentUser *PlansitUser){
 	protoUser := new(PlansItProto)
 	protoUser.GoogleId = proto.String(CurrentUser.Userid)
 	protoUser.Email = proto.String(CurrentUser.Email)
